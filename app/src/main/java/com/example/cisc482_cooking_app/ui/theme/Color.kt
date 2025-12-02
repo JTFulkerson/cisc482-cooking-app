@@ -2,10 +2,8 @@ package com.example.cisc482_cooking_app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
-
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val Cream = Color(0xFFF7F3E3)
+val LightGray = Color(0xFFECF0F1)
+val AccentOrange = Color(0xFFED8607)
+val DeepRed = Color(0xFF6F1A07)
+val EspressoBrown = Color(0xFF2B2118)
