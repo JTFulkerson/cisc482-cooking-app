@@ -1,23 +1,23 @@
 package com.example.cisc482_cooking_app.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,12 +32,24 @@ import com.example.cisc482_cooking_app.ui.theme.CISC482CookingAppTheme
 
 @Composable
 fun GenerateRecipeScreen(
-    ingredientOptions: List<String> = emptyList()
+    ingredientOptions: List<String> = emptyList(),
+    supplyOptions: List<String> = emptyList()
 ) {
     var ingredientQuery by rememberSaveable { mutableStateOf("") }
     val filteredIngredients = ingredientOptions.filter { option ->
         ingredientQuery.isBlank() || option.contains(ingredientQuery, ignoreCase = true)
     }
+    val suggestionLimit = 5
+    val suggestions = filteredIngredients.take(suggestionLimit)
+    val showSuggestions = ingredientQuery.isNotBlank() && suggestions.isNotEmpty()
+    var supplyQuery by rememberSaveable { mutableStateOf("") }
+    val filteredSupplies = supplyOptions.filter { option ->
+        supplyQuery.isBlank() || option.contains(supplyQuery, ignoreCase = true)
+    }
+    val supplySuggestions = filteredSupplies.take(suggestionLimit)
+    val showSupplySuggestions = supplyQuery.isNotBlank() && supplySuggestions.isNotEmpty()
+    var selectedIngredients by rememberSaveable { mutableStateOf(emptyList<String>()) }
+    var selectedSupplies by rememberSaveable { mutableStateOf(emptyList<String>()) }
     var selectedAllergyNames by rememberSaveable { mutableStateOf(emptyList<String>()) }
     var customAllergyText by rememberSaveable { mutableStateOf("") }
     val allergies = Allergy.values().toList()
@@ -68,35 +80,102 @@ fun GenerateRecipeScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        OutlinedTextField(
-            value = ingredientQuery,
-            onValueChange = { ingredientQuery = it },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text(text = "Search ingredients") },
-            singleLine = true
-        )
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Column {
+                OutlinedTextField(
+                    value = ingredientQuery,
+                    onValueChange = { ingredientQuery = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(text = "Search ingredients") },
+                    singleLine = true
+                )
 
-        Spacer(modifier = Modifier.height(16.dp))
+                if (showSuggestions) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaterialTheme.shapes.medium,
+                        tonalElevation = 4.dp
+                    ) {
+                        Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                            suggestions.forEach { ingredient ->
+                                Text(
+                                    text = ingredient,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            if (ingredient !in selectedIngredients) {
+                                                selectedIngredients = selectedIngredients + ingredient
+                                            }
+                                            ingredientQuery = ""
+                                        }
+                                        .padding(horizontal = 16.dp, vertical = 6.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
-        if (ingredientOptions.isEmpty()) {
-            Text(
-                text = "No ingredients available",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        } else {
-            LazyColumn(
+        when {
+            ingredientOptions.isEmpty() -> {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "No ingredients available",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            ingredientQuery.isNotBlank() && suggestions.isEmpty() -> {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "No matches found",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            else -> Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        if (selectedIngredients.isNotEmpty()) {
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 200.dp)
+                    .padding(vertical = 8.dp)
             ) {
-                items(filteredIngredients) { ingredient ->
-                    Text(
-                        text = ingredient,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    )
+                Text(
+                    text = "Selected ingredients",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                selectedIngredients.forEach { ingredient ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = ingredient,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f)
+                        )
+                        TextButton(
+                            onClick = {
+                                selectedIngredients = selectedIngredients.filterNot { it == ingredient }
+                            }
+                        ) {
+                            Text(text = "Remove")
+                        }
+                    }
                 }
             }
         }
@@ -108,6 +187,108 @@ fun GenerateRecipeScreen(
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary
         )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Column {
+                OutlinedTextField(
+                    value = supplyQuery,
+                    onValueChange = { supplyQuery = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(text = "Search supplies") },
+                    singleLine = true
+                )
+
+                if (showSupplySuggestions) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaterialTheme.shapes.medium,
+                        tonalElevation = 4.dp
+                    ) {
+                        Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                            supplySuggestions.forEach { supply ->
+                                Text(
+                                    text = supply,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            if (supply !in selectedSupplies) {
+                                                selectedSupplies = selectedSupplies + supply
+                                            }
+                                            supplyQuery = ""
+                                        }
+                                        .padding(horizontal = 16.dp, vertical = 6.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        when {
+            supplyOptions.isEmpty() -> {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "No supplies available",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            supplyQuery.isNotBlank() && supplySuggestions.isEmpty() -> {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "No matches found",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            else -> Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        if (selectedSupplies.isNotEmpty()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                Text(
+                    text = "Selected supplies",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                selectedSupplies.forEach { supply ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = supply,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f)
+                        )
+                        TextButton(
+                            onClick = {
+                                selectedSupplies = selectedSupplies.filterNot { it == supply }
+                            }
+                        ) {
+                            Text(text = "Remove")
+                        }
+                    }
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -201,6 +382,13 @@ fun GenerateRecipeScreenPreview() {
                     "Garlic",
                     "Olive Oil"
                 ),
+                supplyOptions = listOf(
+                    "Mixing Bowl",
+                    "Spatula",
+                    "Whisk",
+                    "Saucepan",
+                    "Cutting Board"
+                )
             )
         }
     }
