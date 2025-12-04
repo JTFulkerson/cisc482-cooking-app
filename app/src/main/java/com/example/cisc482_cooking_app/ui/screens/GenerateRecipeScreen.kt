@@ -1,6 +1,7 @@
 package com.example.cisc482_cooking_app.ui.screens
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
@@ -60,6 +62,7 @@ fun GenerateRecipeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -70,7 +73,7 @@ fun GenerateRecipeScreen(
             color = MaterialTheme.colorScheme.onBackground
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         Text(
             text = "Ingredients",
@@ -78,7 +81,7 @@ fun GenerateRecipeScreen(
             color = MaterialTheme.colorScheme.primary
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         Box(modifier = Modifier.fillMaxWidth()) {
             Column {
@@ -122,7 +125,7 @@ fun GenerateRecipeScreen(
 
         when {
             ingredientOptions.isEmpty() -> {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = "No ingredients available",
                     style = MaterialTheme.typography.bodyMedium,
@@ -131,7 +134,7 @@ fun GenerateRecipeScreen(
             }
 
             ingredientQuery.isNotBlank() && suggestions.isEmpty() -> {
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = "No matches found",
                     style = MaterialTheme.typography.bodyMedium,
@@ -139,26 +142,26 @@ fun GenerateRecipeScreen(
                 )
             }
 
-            else -> Spacer(modifier = Modifier.height(16.dp))
+            else -> Spacer(modifier = Modifier.height(10.dp))
         }
 
         if (selectedIngredients.isNotEmpty()) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp)
+                    .padding(vertical = 4.dp)
             ) {
                 Text(
                     text = "Selected ingredients",
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.primary
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 selectedIngredients.forEach { ingredient ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 4.dp),
+                            .padding(vertical = 2.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
@@ -180,7 +183,7 @@ fun GenerateRecipeScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         Text(
             text = "Supplies",
@@ -188,7 +191,7 @@ fun GenerateRecipeScreen(
             color = MaterialTheme.colorScheme.primary
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         Box(modifier = Modifier.fillMaxWidth()) {
             Column {
@@ -232,7 +235,7 @@ fun GenerateRecipeScreen(
 
         when {
             supplyOptions.isEmpty() -> {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = "No supplies available",
                     style = MaterialTheme.typography.bodyMedium,
@@ -241,7 +244,7 @@ fun GenerateRecipeScreen(
             }
 
             supplyQuery.isNotBlank() && supplySuggestions.isEmpty() -> {
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = "No matches found",
                     style = MaterialTheme.typography.bodyMedium,
@@ -249,26 +252,26 @@ fun GenerateRecipeScreen(
                 )
             }
 
-            else -> Spacer(modifier = Modifier.height(16.dp))
+            else -> Spacer(modifier = Modifier.height(10.dp))
         }
 
         if (selectedSupplies.isNotEmpty()) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp)
+                    .padding(vertical = 4.dp)
             ) {
                 Text(
                     text = "Selected supplies",
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.primary
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 selectedSupplies.forEach { supply ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 4.dp),
+                            .padding(vertical = 2.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
@@ -290,7 +293,7 @@ fun GenerateRecipeScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         Text(
             text = "Any allergies or preferences?",
