@@ -3,13 +3,20 @@ package com.example.cisc482_cooking_app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -18,6 +25,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.cisc482_cooking_app.model.Allergy
+import com.example.cisc482_cooking_app.model.User
 import com.example.cisc482_cooking_app.navigation.Screen
 import com.example.cisc482_cooking_app.ui.components.BottomNavigationBar
 import com.example.cisc482_cooking_app.ui.screens.BrowseScreen
@@ -30,10 +39,9 @@ import com.example.cisc482_cooking_app.ui.theme.Cream
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             CISC482CookingAppTheme {
-                AppNavigation()
+                CollegeFridgeApp()
             }
         }
     }
@@ -41,9 +49,31 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavigation() {
+fun CollegeFridgeApp() {
     val navController = rememberNavController()
+
+    // --- STATE IS HOISTED AND CORRECTED HERE ---
+    // The User state now matches the User.kt data class exactly.
+    var userState by remember {
+        mutableStateOf(
+            User(
+                id = "12345", // Added required ID
+                name = "John",
+                email = "jtfulky@udel.edu",
+                hashedPassword = "a_very_secure_placeholder_hash", // Added required password hash
+                allergies = listOf( // Using an immutable List, as per User.kt
+                    Allergy.SOY, Allergy.EGGS, Allergy.PEANUTS, Allergy.FISH, Allergy.SESAME,
+                    Allergy.SHELLFISH, Allergy.TREE_NUTS, Allergy.MILK, Allergy.WHEAT_GLUTEN
+                ),
+                // customAllergy is null because Allergy.OTHER is not in the initial list.
+                customAllergy = null
+            )
+        )
+    }
+    // --- END OF HOISTED STATE ---
+
     Scaffold(
+        containerColor = Cream,
         topBar = {
             TopAppBar(
                 title = {
@@ -55,7 +85,7 @@ fun AppNavigation() {
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { /* Handle navigation icon click */ }) {
+                    IconButton(onClick = { /* Handle menu icon click */ }) {
                         Icon(Icons.Default.Menu, contentDescription = "Menu")
                     }
                 },
@@ -63,16 +93,25 @@ fun AppNavigation() {
             )
         },
         bottomBar = { BottomNavigationBar(navController = navController) }
-    ) { paddingValues ->
+    ) { innerPadding ->
         NavHost(
             navController = navController,
             startDestination = Screen.Profile.route,
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Scanner.route) { ScannerScreen() }
             composable(Screen.Browse.route) { BrowseScreen() }
             composable(Screen.Recipes.route) { RecipesScreen() }
-            composable(Screen.Profile.route) { ProfileScreen() }
+
+            // Pass the corrected state and update function to ProfileScreen
+            composable(Screen.Profile.route) {
+                ProfileScreen(
+                    user = userState,
+                    onUserChange = { updatedUser ->
+                        userState = updatedUser
+                    }
+                )
+            }
         }
     }
 }

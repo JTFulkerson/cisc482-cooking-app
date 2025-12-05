@@ -10,17 +10,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.MenuBook // Import MenuBook
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight // <-- Import FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -30,7 +32,8 @@ import com.example.cisc482_cooking_app.navigation.Screen
 import com.example.cisc482_cooking_app.ui.theme.CISC482CookingAppTheme
 import com.example.cisc482_cooking_app.ui.theme.Cream
 import com.example.cisc482_cooking_app.ui.theme.EspressoBrown
-import com.example.cisc482_cooking_app.ui.theme.LightGray
+// Import your NavBackground color
+import com.example.cisc482_cooking_app.ui.theme.NavBackground
 
 @Composable
 fun BottomNavigationBar(navController: NavController) {
@@ -40,22 +43,27 @@ fun BottomNavigationBar(navController: NavController) {
         Screen.Recipes,
         Screen.Profile
     )
+    // Using filled icons for a bolder look, as seen in the image
     val icons = listOf(
-        Icons.Filled.QrCodeScanner,
+        Icons.Default.QrCodeScanner,
         Icons.Default.Search,
-        Icons.Filled.MenuBook, // Use MenuBook instead of Book
+        Icons.Default.MenuBook,
         Icons.AutoMirrored.Filled.List
     )
     val labels = listOf("Scanner", "Browse", "Recipes", "Pantry")
 
+    // The Surface now acts as the floating, rounded container for the whole bar
     Surface(
-        color = Cream,
-        modifier = Modifier.fillMaxWidth()
+        color = NavBackground,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clip(RoundedCornerShape(24.dp))
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 8.dp),
+                .padding(all = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -64,7 +72,7 @@ fun BottomNavigationBar(navController: NavController) {
 
             items.forEachIndexed { index, screen ->
                 val isSelected = currentRoute == screen.route
-                val backgroundColor = if (isSelected) EspressoBrown else LightGray
+                val backgroundColor = if (isSelected) EspressoBrown else Color.Transparent
                 val contentColor = if (isSelected) Cream else EspressoBrown
 
                 Column(
@@ -87,17 +95,30 @@ fun BottomNavigationBar(navController: NavController) {
                         contentDescription = labels[index],
                         tint = contentColor
                     )
-                    Text(text = labels[index], color = contentColor)
+                    // --- THIS IS THE CHANGED LINE ---
+                    Text(
+                        text = labels[index],
+                        color = contentColor,
+                        fontWeight = FontWeight.Bold // Make the text bold
+                    )
+                    // --- END OF CHANGE ---
                 }
             }
         }
     }
 }
 
-@Preview(showBackground = true)
+// ... (The rest of your BottomNavigationBar.kt file is correct and stays the same) ...
+
+@Preview(showBackground = true, backgroundColor = 0xFFFFF7E1) // Use Cream color hex for preview
 @Composable
 fun BottomNavigationBarPreview() {
     CISC482CookingAppTheme {
-        BottomNavigationBar(navController = rememberNavController())
+        // Wrap the component in a Surface with the app's background color
+        // to accurately represent how it looks in the app.
+        Surface(color = Cream) {
+            BottomNavigationBar(navController = rememberNavController())
+        }
     }
 }
+
