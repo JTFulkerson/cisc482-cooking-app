@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -25,17 +26,22 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.cisc482_cooking_app.data.ai.GeminiRecipeRequest
+import com.example.cisc482_cooking_app.data.ai.GeminiResult
 import com.example.cisc482_cooking_app.model.Allergy
 import com.example.cisc482_cooking_app.ui.theme.CISC482CookingAppTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun GenerateRecipeScreen(
     ingredientOptions: List<String> = emptyList(),
-    supplyOptions: List<String> = emptyList()
+    supplyOptions: List<String> = emptyList(),
+    generateRecipe: (suspend (GeminiRecipeRequest) -> GeminiResult<String>)? = null
 ) {
     var ingredientQuery by rememberSaveable { mutableStateOf("") }
     val filteredIngredients = ingredientOptions.filter { option ->
@@ -54,6 +60,11 @@ fun GenerateRecipeScreen(
     var selectedSupplies by rememberSaveable { mutableStateOf(emptyList<String>()) }
     var selectedAllergyNames by rememberSaveable { mutableStateOf(emptyList<String>()) }
     var customAllergyText by rememberSaveable { mutableStateOf("") }
+    var additionalRequest by rememberSaveable { mutableStateOf("") }
+    var isGenerating by rememberSaveable { mutableStateOf(false) }
+    var generatedRecipe by rememberSaveable { mutableStateOf<String?>(null) }
+    var generationError by rememberSaveable { mutableStateOf<String?>(null) }
+    val coroutineScope = rememberCoroutineScope()
     val allergies = Allergy.values().toList()
     val columnSize = (allergies.size + 3 - 1) / 3
     val allergyColumns = allergies.chunked(columnSize)
@@ -331,8 +342,76 @@ fun GenerateRecipeScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = { /* TODO: hook into recipe generation */ }) {
-            Text(text = "Create")
+        OutlinedTextField(
+            value = additionalRequest,
+            onValueChange = { additionalRequest = it },
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text(text = "Any special requests?") }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+                val generator = generateRecipe ?: return@Button
+                val allergyList = selectedAllergyNames.mapNotNull { name ->
+                    runCatching { Allergy.valueOf(name).displayName }.getOrNull()
+                }.toMutableList()
+                if (otherSelected && customAllergyText.isNotBlank()) {
+                    allergyList.add(customAllergyText.trim())
+                }
+                val request = GeminiRecipeRequest(
+                    ingredients = selectedIngredients,
+                    supplies = selectedSupplies,
+                    allergies = allergyList,
+                    customRequest = additionalRequest.takeIf { it.isNotBlank() }
+                )
+
+                coroutineScope.launch {
+                    isGenerating = true
+                    generationError = null
+                    generatedRecipe = null
+                    when (val result = generator.invoke(request)) {
+                        is GeminiResult.Success -> generatedRecipe = result.data
+                        is GeminiResult.Error -> generationError = result.message
+                    }
+                    isGenerating = false
+                }
+            },
+            enabled = generateRecipe != null && !isGenerating
+        ) {
+            Text(text = if (isGenerating) "Creating..." else "Create")
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        when {
+            isGenerating -> {
+                CircularProgressIndicator()
+            }
+
+            generationError != null -> {
+                Text(
+                    text = generationError ?: "",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            generatedRecipe != null -> {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    tonalElevation = 2.dp,
+                    shape = MaterialTheme.shapes.medium
+                ) {
+                    Text(
+                        text = generatedRecipe.orEmpty(),
+                        modifier = Modifier.padding(16.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
         }
     }
 }
@@ -391,7 +470,8 @@ fun GenerateRecipeScreenPreview() {
                     "Whisk",
                     "Saucepan",
                     "Cutting Board"
-                )
+                ),
+                generateRecipe = { GeminiResult.Success("Sample recipe preview output") }
             )
         }
     }

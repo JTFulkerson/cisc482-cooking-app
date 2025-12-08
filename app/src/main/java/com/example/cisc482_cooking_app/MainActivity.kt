@@ -10,8 +10,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.cisc482_cooking_app.data.ai.GeminiRepository
+import com.example.cisc482_cooking_app.data.ai.GeminiService
 import com.example.cisc482_cooking_app.ui.screens.GenerateRecipeScreen
 import com.example.cisc482_cooking_app.ui.theme.CISC482CookingAppTheme
 
@@ -21,6 +24,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             CISC482CookingAppTheme {
+                val geminiRepository = remember {
+                    GeminiRepository(GeminiService(BuildConfig.GEMINI_API_KEY))
+                }
                 Surface {
                     GenerateRecipeScreen(
                         ingredientOptions = listOf(
@@ -172,7 +178,10 @@ class MainActivity : ComponentActivity() {
                             "Tongs",
                             "Whisk",
                             "Wooden Spoon"
-                        )
+                        ),
+                        generateRecipe = { request ->
+                            geminiRepository.generateRecipeFromSelections(request)
+                        }
                     )
                 }
             }
