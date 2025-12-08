@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -34,6 +34,8 @@ import androidx.compose.ui.unit.dp
 import com.example.cisc482_cooking_app.data.ai.GeminiRecipeRequest
 import com.example.cisc482_cooking_app.data.ai.GeminiResult
 import com.example.cisc482_cooking_app.model.Allergy
+import com.example.cisc482_cooking_app.ui.components.LoadingPopup
+import com.example.cisc482_cooking_app.ui.theme.AccentOrange
 import com.example.cisc482_cooking_app.ui.theme.CISC482CookingAppTheme
 import kotlinx.coroutines.launch
 
@@ -81,7 +83,7 @@ fun GenerateRecipeScreen(
         Text(
             text = "Have AI Chef create you a recipe",
             style = MaterialTheme.typography.headlineLarge,
-            color = MaterialTheme.colorScheme.onBackground
+            color = AccentOrange
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -89,7 +91,7 @@ fun GenerateRecipeScreen(
         Text(
             text = "Ingredients",
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary
+            color = AccentOrange
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -165,7 +167,7 @@ fun GenerateRecipeScreen(
                 Text(
                     text = "Selected ingredients",
                     style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.primary
+                    color = AccentOrange
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 selectedIngredients.forEach { ingredient ->
@@ -199,7 +201,7 @@ fun GenerateRecipeScreen(
         Text(
             text = "Supplies",
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary
+            color = AccentOrange
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -275,7 +277,7 @@ fun GenerateRecipeScreen(
                 Text(
                     text = "Selected supplies",
                     style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.primary
+                    color = AccentOrange
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 selectedSupplies.forEach { supply ->
@@ -309,7 +311,7 @@ fun GenerateRecipeScreen(
         Text(
             text = "Any allergies or preferences?",
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary
+            color = AccentOrange
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -378,7 +380,11 @@ fun GenerateRecipeScreen(
                     isGenerating = false
                 }
             },
-            enabled = generateRecipe != null && !isGenerating
+            enabled = generateRecipe != null && !isGenerating,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = AccentOrange,
+                contentColor = androidx.compose.ui.graphics.Color.White
+            )
         ) {
             Text(text = if (isGenerating) "Creating..." else "Create")
         }
@@ -386,9 +392,7 @@ fun GenerateRecipeScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         when {
-            isGenerating -> {
-                CircularProgressIndicator()
-            }
+            isGenerating -> LoadingPopup()
 
             generationError != null -> {
                 Text(

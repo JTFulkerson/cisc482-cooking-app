@@ -5,8 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,6 +15,7 @@ import com.example.cisc482_cooking_app.data.ai.GeminiRepository
 import com.example.cisc482_cooking_app.data.ai.GeminiService
 import com.example.cisc482_cooking_app.ui.screens.GenerateRecipeScreen
 import com.example.cisc482_cooking_app.ui.theme.CISC482CookingAppTheme
+import com.example.cisc482_cooking_app.ui.theme.Cream
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,7 +26,10 @@ class MainActivity : ComponentActivity() {
                 val geminiRepository = remember {
                     GeminiRepository(GeminiService(BuildConfig.GEMINI_API_KEY))
                 }
-                Surface {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = Cream
+                ) {
                     GenerateRecipeScreen(
                         ingredientOptions = listOf(
                             "All-purpose Flour",

@@ -14,6 +14,7 @@ import org.json.JSONObject
 import java.io.IOException
 
 private const val GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1/models"
+private const val TAG = "GeminiService"
 private val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()
 
 /**
@@ -68,7 +69,7 @@ class GeminiService(
                 client.newCall(httpRequest).execute().use { response ->
                     if (!response.isSuccessful) {
                         val errorBody = response.body?.string()
-                        Log.e("GeminiService", "HTTP ${response.code} -> $errorBody")
+                        Log.e(TAG, "HTTP ${response.code} -> $errorBody")
                         return@withContext GeminiResult.Error(
                             "Gemini request failed (${response.code})",
                             errorBody
@@ -79,6 +80,8 @@ class GeminiService(
                         "Gemini response body was empty"
                     )
 
+                    Log.d(TAG, "Raw Gemini response: $body")
+
                     val parsedText = parseTextFromResponse(body)
                     if (parsedText != null) {
                         GeminiResult.Success(parsedText)
@@ -87,7 +90,7 @@ class GeminiService(
                     }
                 }
             } catch (ioException: IOException) {
-                Log.e("GeminiService", "Network error", ioException)
+                Log.e(TAG, "Network error", ioException)
                 GeminiResult.Error("Network error talking to Gemini", ioException.message)
             }
         }
@@ -137,7 +140,21 @@ data class GeminiRecipeRequest(
         if (!customRequest.isNullOrBlank()) {
             appendLine("Additional request: ${customRequest.trim()}")
         }
-        append("Return a JSON object with title, servings, prep_time, cook_time, ingredients, and steps.")
+        appendLine("Return ONLY valid minified JSON with no markdown fences or commentary.")
+        appendLine("The JSON must map 1:1 to this Recipe model:")
+        appendLine("{" +
+            "\"id\": \"unique-id-string\"," +
+            "\"title\": \"short recipe title\"," +
+            "\"description\": \"brief summary\"," +
+            "\"ingredients\": [\"ingredient detail\"]," +
+            "\"steps\": [\"step instructions\"]," +
+            "\"imageUrls\": [\"https://example.com/image.jpg\"]," +
+            "\"totalTimeMinutes\": 45," +
+            "\"rating\": 4.5," +
+            "\"difficulty\": \"EASY|MEDIUM|HARD\"" +
+            "}")
+        appendLine("Constraints: ingredients and steps must each list at least 3 entries; imageUrls can be empty but prefer at least one plausible https URL; totalTimeMinutes must be a positive integer; rating must be a number between 0 and 5; difficulty must be exactly one of EASY, MEDIUM, HARD.")
+        append("Do not wrap the JSON in prose; respond with the object only.")
     }
 }
 
