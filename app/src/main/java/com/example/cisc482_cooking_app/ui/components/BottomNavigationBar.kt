@@ -71,7 +71,8 @@ fun BottomNavigationBar(navController: NavController) {
             val currentRoute = navBackStackEntry?.destination?.route
 
             items.forEachIndexed { index, screen ->
-                val isSelected = currentRoute == screen.route
+                val isSelected = currentRoute == screen.route ||
+                    (screen == Screen.Recipes && currentRoute == Screen.GenerateRecipe.route)
                 val backgroundColor = if (isSelected) EspressoBrown else Color.Transparent
                 val contentColor = if (isSelected) Cream else EspressoBrown
 
