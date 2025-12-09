@@ -13,13 +13,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -48,7 +44,6 @@ fun GenerateRecipeScreen(
     ingredientOptions: List<String> = emptyList(),
     supplyOptions: List<String> = emptyList(),
     generateRecipe: (suspend (GeminiRecipeRequest) -> GeminiResult<String>)? = null,
-    navigateToCamera: () -> Unit = {}
 ) {
     var ingredientQuery by rememberSaveable { mutableStateOf("") }
     val filteredIngredients = ingredientOptions.filter { option ->
@@ -93,23 +88,11 @@ fun GenerateRecipeScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Ingredients",
-                style = MaterialTheme.typography.titleMedium,
-                color = AccentOrange
-            )
-            IconButton(onClick = navigateToCamera) {
-                Icon(
-                    imageVector = Icons.Default.Camera,
-                    contentDescription = "Scan ingredients from camera"
-                )
-            }
-        }
+        Text(
+            text = "Ingredients",
+            style = MaterialTheme.typography.titleMedium,
+            color = AccentOrange
+        )
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -493,7 +476,6 @@ fun GenerateRecipeScreenPreview() {
                     "Cutting Board"
                 ),
                 generateRecipe = { GeminiResult.Success("Sample recipe preview output") },
-                navigateToCamera = {}
             )
         }
     }

@@ -1,25 +1,47 @@
 package com.example.cisc482_cooking_app
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.cisc482_cooking_app.data.ai.GeminiRepository
 import com.example.cisc482_cooking_app.data.ai.GeminiService
-import com.example.cisc482_cooking_app.ui.screens.GenerateRecipeScreen
-import com.example.cisc482_cooking_app.ui.screens.ScannerScreen
+import com.example.cisc482_cooking_app.ui.screens.*
 import com.example.cisc482_cooking_app.ui.theme.CISC482CookingAppTheme
-import com.example.cisc482_cooking_app.ui.theme.Cream
+
+sealed class Screen(val route: String, val label: String, val icon: @Composable () -> Unit) {
+    object GenerateRecipe : Screen("generate_recipe", "Generator", { Icon(Icons.Default.Home, contentDescription = null) })
+    object Scanner : Screen("scanner", "Scanner", { Icon(Icons.Default.CameraAlt, contentDescription = null) })
+    object SocialFeed : Screen("social_feed", "Social", { Icon(Icons.Default.Share, contentDescription = null) })
+    object UserProfile : Screen("user_profile", "Profile", { Icon(Icons.Default.Person, contentDescription = null) })
+}
+
+object RecipeDetailDest : Screen("recipe_detail/{recipeId}", "Recipe", { /* No icon needed */ })
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,194 +53,72 @@ class MainActivity : ComponentActivity() {
                     GeminiRepository(GeminiService(BuildConfig.GEMINI_API_KEY))
                 }
                 val navController = rememberNavController()
+                val items = listOf(Screen.GenerateRecipe, Screen.Scanner, Screen.SocialFeed, Screen.UserProfile)
+                val context = LocalContext.current
 
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = Cream
-                ) {
-                   NavHost(navController = navController, startDestination = "generate_recipe") {
-                       composable("generate_recipe") {
-                           GenerateRecipeScreen(
-                               ingredientOptions = listOf(
-                                   "All-purpose Flour",
-                                   "Almonds",
-                                   "Apples",
-                                   "Avocado",
-                                   "Bacon",
-                                   "Baking Powder",
-                                   "Baking Soda",
-                                   "Basil",
-                                   "Beans",
-                                   "Beef Broth",
-                                   "Bell Pepper",
-                                   "Blueberries",
-                                   "Bread Crumbs",
-                                   "Broccoli",
-                                   "Brown Rice",
-                                   "Brown Sugar",
-                                   "Butter",
-                                   "Cabbage",
-                                   "Carrots",
-                                   "Cashews",
-                                   "Cauliflower",
-                                   "Celery",
-                                   "Cheddar Cheese",
-                                   "Chicken Breast",
-                                   "Chicken Stock",
-                                   "Chickpeas",
-                                   "Chili Powder",
-                                   "Chocolate Chips",
-                                   "Cilantro",
-                                   "Cinnamon",
-                                   "Coconut Milk",
-                                   "Cornmeal",
-                                   "Cornstarch",
-                                   "Cream Cheese",
-                                   "Cucumber",
-                                   "Cumin",
-                                   "Eggplant",
-                                   "Eggs",
-                                   "Feta Cheese",
-                                   "Fish Sauce",
-                                   "Garlic",
-                                   "Ginger",
-                                   "Granulated Sugar",
-                                   "Green Beans",
-                                   "Green Onion",
-                                   "Ground Beef",
-                                   "Ground Turkey",
-                                   "Honey",
-                                   "Hot Sauce",
-                                   "Italian Seasoning",
-                                   "Kale",
-                                   "Ketchup",
-                                   "Lemons",
-                                   "Lentils",
-                                   "Lettuce",
-                                   "Lime Juice",
-                                   "Maple Syrup",
-                                   "Milk",
-                                   "Mushrooms",
-                                   "Mustard",
-                                   "Nutmeg",
-                                   "Oats",
-                                   "Olive Oil",
-                                   "Onion",
-                                   "Oregano",
-                                   "Paprika",
-                                   "Parmesan",
-                                   "Parsley",
-                                   "Peanut Butter",
-                                   "Peanuts",
-                                   "Pecans",
-                                   "Pesto",
-                                   "Pineapple",
-                                   "Pinto Beans",
-                                   "Pork Chops",
-                                   "Potatoes",
-                                   "Pumpkin Puree",
-                                   "Quinoa",
-                                   "Raisins",
-                                   "Red Cabbage",
-                                   "Red Onion",
-                                   "Rice Vinegar",
-                                   "Rosemary",
-                                   "Salsa",
-                                   "Salmon",
-                                   "Sea Salt",
-                                   "Sesame Oil",
-                                   "Shrimp",
-                                   "Sour Cream",
-                                   "Soy Sauce",
-                                   "Spinach",
-                                   "Sun-dried Tomatoes",
-                                   "Sweet Potatoes",
-                                   "Thyme",
-                                   "Tofu",
-                                   "Tomato Paste",
-                                   "Tomatoes",
-                                   "Tortillas",
-                                   "Vanilla Extract",
-                                   "Yogurt"
-                               ),
-                               supplyOptions = listOf(
-                                   "Baking Sheet",
-                                   "Blender",
-                                   "Bottle Opener",
-                                   "Box Grater",
-                                   "Bread Knife",
-                                   "Can Opener",
-                                   "Cast Iron Skillet",
-                                   "Chef's Knife",
-                                   "Colander",
-                                   "Cooling Rack",
-                                   "Cutting Board",
-                                   "Dutch Oven",
-                                   "Fish Spatula",
-                                   "Food Processor",
-                                   "Garlic Press",
-                                   "Hand Mixer",
-                                   "Instant-read Thermometer",
-                                   "Kitchen Shears",
-                                   "Ladle",
-                                   "Measuring Cups",
-                                   "Measuring Spoons",
-                                   "Microplane Zester",
-                                   "Mixing Bowls",
-                                   "Muffin Pan",
-                                   "Offset Spatula",
-                                   "Oven Mitts",
-                                   "Paring Knife",
-                                   "Peeler",
-                                   "Pizza Cutter",
-                                   "Potholders",
-                                   "Pressure Cooker",
-                                   "Rolling Pin",
-                                   "Salad Spinner",
-                                   "Saucepan",
-                                   "Saute Pan",
-                                   "Sheet Pan",
-                                   "Sieve",
-                                   "Skewers",
-                                   "Slow Cooker",
-                                   "Spatula",
-                                   "Spider Strainer",
-                                   "Stand Mixer",
-                                   "Stockpot",
-                                   "Tongs",
-                                   "Whisk",
-                                   "Wooden Spoon"
-                               ),
-                               generateRecipe = { request ->
-                                   geminiRepository.generateRecipeFromSelections(request)
-                               },
-                               navigateToCamera = {
-                                   navController.navigate("scanner")
-                               }
-                           )
-                       }
-                       composable("scanner") {
-                           ScannerScreen()
-                       }
-                   }
+                Scaffold(
+                    bottomBar = {
+                        NavigationBar {
+                            val navBackStackEntry by navController.currentBackStackEntryAsState()
+                            val currentDestination = navBackStackEntry?.destination
+                            items.forEach { screen ->
+                                NavigationBarItem(
+                                    icon = screen.icon,
+                                    label = { Text(screen.label) },
+                                    selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
+                                    onClick = {
+                                        navController.navigate(screen.route) {
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
+                ) { innerPadding ->
+                    NavHost(
+                        navController = navController,
+                        startDestination = Screen.GenerateRecipe.route,
+                        modifier = Modifier.padding(innerPadding)
+                    ) {
+                        composable(Screen.GenerateRecipe.route) {
+                            GenerateRecipeScreen(
+                                ingredientOptions = listOf("All-purpose Flour", "..."),
+                                supplyOptions = listOf("Baking Sheet", "..."),
+                                generateRecipe = { request ->
+                                    geminiRepository.generateRecipeFromSelections(request)
+                                }
+                            )
+                        }
+                        composable(Screen.Scanner.route) {
+                            ScannerScreen()
+                        }
+                        composable(Screen.SocialFeed.route) {
+                            SocialFeedScreen(posts = sampleFeed) {
+                                navController.navigate("recipe_detail/$it")
+                            }
+                        }
+                        composable(Screen.UserProfile.route) {
+                            UserProfileScreen(user = sampleUserProfile) {
+                                navController.navigate("recipe_detail/$it")
+                            }
+                        }
+                        composable(
+                            route = RecipeDetailDest.route,
+                            arguments = listOf(navArgument("recipeId") { type = NavType.StringType })
+                        ) {
+                            RecipeDetailScreen(recipe = sampleRecipeDetails) {
+                                Toast.makeText(context, "Recipe imported!", Toast.LENGTH_SHORT).show()
+                                navController.popBackStack()
+                            }
+                        }
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    CISC482CookingAppTheme {
-        Greeting("Android")
     }
 }
