@@ -52,25 +52,22 @@ class MainActivity : ComponentActivity() {
 fun CollegeFridgeApp() {
     val navController = rememberNavController()
 
-    // --- STATE IS HOISTED AND CORRECTED HERE ---
-    // The User state now matches the User.kt data class exactly.
     var userState by remember {
         mutableStateOf(
             User(
-                id = "12345", // Added required ID
+                id = "12345",
                 name = "John",
                 email = "jtfulky@udel.edu",
                 hashedPassword = "a_very_secure_placeholder_hash", // Added required password hash
-                allergies = listOf( // Using an immutable List, as per User.kt
+                allergies = listOf(
                     Allergy.SOY, Allergy.EGGS, Allergy.PEANUTS, Allergy.FISH, Allergy.SESAME,
                     Allergy.SHELLFISH, Allergy.TREE_NUTS, Allergy.MILK, Allergy.WHEAT_GLUTEN
                 ),
-                // customAllergy is null because Allergy.OTHER is not in the initial list.
+
                 customAllergy = null
             )
         )
     }
-    // --- END OF HOISTED STATE ---
 
     Scaffold(
         containerColor = Cream,

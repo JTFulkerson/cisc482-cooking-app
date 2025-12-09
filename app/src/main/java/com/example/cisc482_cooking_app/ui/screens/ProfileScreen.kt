@@ -283,9 +283,9 @@ fun AllergiesSection(
                         modifier = Modifier.weight(1f)
                     )
 
-                    // If we are on the last row AND it's an incomplete row
+
                     if (index == chunkedAllergies.lastIndex && rowAllergies.size == 1) {
-                        // Display the "Other" text field in the second column
+
                         OutlinedTextField(
                             value = customAllergyText,
                             onValueChange = onCustomAllergyTextChange,
@@ -323,7 +323,7 @@ fun AllergyCheckbox(
     modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = modifier.height(56.dp), // Set fixed height for alignment
+        modifier = modifier.height(56.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Checkbox(
