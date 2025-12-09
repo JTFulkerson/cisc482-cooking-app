@@ -24,24 +24,18 @@ data class RecipeDetails(
     val instructions: String
 )
 
-val sampleRecipeDetails = RecipeDetails(
-    id = "1",
-    title = "Classic Tomato Bruschetta",
-    imageUrl = "https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
-    ingredients = listOf(
-        "4 medium tomatoes, diced",
-        "1/4 cup fresh basil, chopped",
-        "2 cloves garlic, minced",
-        "1 tbsp balsamic vinegar",
-        "1 tbsp olive oil",
-        "Salt and pepper to taste",
-        "1 baguette, sliced"
-    ),
-    instructions = "1. In a bowl, combine tomatoes, basil, garlic, balsamic vinegar, and olive oil. Season with salt and pepper.\n2. Toast the baguette slices until golden brown.\n3. Top each slice with the tomato mixture and serve immediately."
-)
-
 @Composable
-fun RecipeDetailScreen(recipe: RecipeDetails, onImport: (String) -> Unit) {
+fun RecipeDetailScreen(
+    recipe: RecipeDetails?,
+    onImport: (String) -> Unit
+) {
+    if (recipe == null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+            Text("Recipe not found.")
+        }
+        return
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()

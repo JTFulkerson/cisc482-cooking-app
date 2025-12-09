@@ -26,20 +26,7 @@ import coil.request.ImageRequest
 data class UserProfile(
     val name: String,
     val profileImageUrl: String,
-    val sharedRecipes: List<String> // List of image URLs
-)
-
-val sampleUserProfile = UserProfile(
-    name = "Jane Doe",
-    profileImageUrl = "https://randomuser.me/api/portraits/women/75.jpg",
-    sharedRecipes = listOf(
-        "https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
-        "https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
-        "https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
-        "https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
-        "https://images.pexels.com/photos/461198/pexels-photo-461198.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
-        "https://images.pexels.com/photos/1099680/pexels-photo-1099680.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260"
-    )
+    val sharedRecipes: List<String> // Now holds recipe IDs
 )
 
 @Composable
@@ -89,20 +76,23 @@ fun UserProfileScreen(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            items(user.sharedRecipes) { recipeImageUrl ->
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        ImageRequest.Builder(LocalContext.current).data(data = recipeImageUrl).apply(block = fun ImageRequest.Builder.() {
-                            crossfade(true)
-                        }).build()
-                    ),
-                    contentDescription = "A shared recipe",
-                    modifier = Modifier
-                        .aspectRatio(1f)
-                        .background(Color.LightGray)
-                        .clickable { onRecipeClick(recipeImageUrl) },
-                    contentScale = ContentScale.Crop
-                )
+            items(user.sharedRecipes) { recipeId ->
+                val recipe = allSampleRecipes.find { it.id == recipeId }
+                if (recipe != null) {
+                    Image(
+                        painter = rememberAsyncImagePainter(
+                            ImageRequest.Builder(LocalContext.current).data(data = recipe.imageUrl).apply(block = fun ImageRequest.Builder.() {
+                                crossfade(true)
+                            }).build()
+                        ),
+                        contentDescription = recipe.title,
+                        modifier = Modifier
+                            .aspectRatio(1f)
+                            .background(Color.LightGray)
+                            .clickable { onRecipeClick(recipe.id) }, // Pass the ID
+                        contentScale = ContentScale.Crop
+                    )
+                }
             }
         }
     }

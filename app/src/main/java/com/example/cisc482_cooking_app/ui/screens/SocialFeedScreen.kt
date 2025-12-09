@@ -34,27 +34,6 @@ data class PostUser(
     val profileImageUrl: String
 )
 
-val sampleFeed = listOf(
-    RecipePost(
-        id = "1",
-        user = PostUser("John Doe", "https://randomuser.me/api/portraits/men/75.jpg"),
-        imageUrl = "https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
-        caption = "Just made this delicious salad! So refreshing and healthy. #healthyeating #salad #recipe"
-    ),
-    RecipePost(
-        id = "2",
-        user = PostUser("Alice Smith", "https://randomuser.me/api/portraits/women/44.jpg"),
-        imageUrl = "https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
-        caption = "Pancakes for breakfast, the perfect start to the day. Who wants some? 🥞"
-    ),
-    RecipePost(
-        id = "3",
-        user = PostUser("Bob Johnson", "https://randomuser.me/api/portraits/men/32.jpg"),
-        imageUrl = "https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
-        caption = "Burger and fries, a classic combo that never gets old. #burger #fries #food"
-    )
-)
-
 @Composable
 fun SocialFeedScreen(
     posts: List<RecipePost>,

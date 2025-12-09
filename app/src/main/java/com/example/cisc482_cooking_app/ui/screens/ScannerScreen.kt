@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.example.cisc482_cooking_app.BuildConfig
+import com.example.cisc482_cooking_app.ui.theme.AccentOrange
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import kotlinx.coroutines.Dispatchers
@@ -104,7 +105,7 @@ fun ScannerScreen() {
                 Icon(
                     imageVector = Icons.Default.CameraAlt,
                     contentDescription = "Take picture",
-                    tint = Color.White
+                    tint = AccentOrange
                 )
             }
         }
@@ -112,7 +113,7 @@ fun ScannerScreen() {
         when (val state = screenState) {
             is ScannerScreenState.Loading -> {
                 Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f)), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(color = AccentOrange)
                 }
             }
             is ScannerScreenState.Success -> {
@@ -177,8 +178,12 @@ private fun ResultView(message: String, onDismiss: () -> Unit) {
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = message, color = Color.White)
-            Button(onClick = onDismiss, modifier = Modifier.padding(top = 16.dp)) {
+            Text(text = message, color = Color.White, style = MaterialTheme.typography.bodyLarge)
+            Button(
+                onClick = onDismiss, 
+                modifier = Modifier.padding(top = 16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = AccentOrange)
+            ) {
                 Text("Scan Again")
             }
         }

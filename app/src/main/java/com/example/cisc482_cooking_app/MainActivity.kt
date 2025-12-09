@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
@@ -16,9 +17,8 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -38,10 +38,14 @@ sealed class Screen(val route: String, val label: String, val icon: @Composable 
     object GenerateRecipe : Screen("generate_recipe", "Generator", { Icon(Icons.Default.Home, contentDescription = null) })
     object Scanner : Screen("scanner", "Scanner", { Icon(Icons.Default.CameraAlt, contentDescription = null) })
     object SocialFeed : Screen("social_feed", "Social", { Icon(Icons.Default.Share, contentDescription = null) })
+    object MyRecipes : Screen("my_recipes", "My Recipes", { Icon(Icons.Default.Book, contentDescription = null) })
     object UserProfile : Screen("user_profile", "Profile", { Icon(Icons.Default.Person, contentDescription = null) })
 }
 
-object RecipeDetailDest : Screen("recipe_detail/{recipeId}", "Recipe", { /* No icon needed */ })
+object RecipeDetailDest {
+    const val route = "recipe_detail/{recipeId}"
+    fun createRoute(recipeId: String) = "recipe_detail/$recipeId"
+}
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,8 +57,9 @@ class MainActivity : ComponentActivity() {
                     GeminiRepository(GeminiService(BuildConfig.GEMINI_API_KEY))
                 }
                 val navController = rememberNavController()
-                val items = listOf(Screen.GenerateRecipe, Screen.Scanner, Screen.SocialFeed, Screen.UserProfile)
+                val items = listOf(Screen.GenerateRecipe, Screen.Scanner, Screen.SocialFeed, Screen.MyRecipes, Screen.UserProfile)
                 val context = LocalContext.current
+                var myRecipes by rememberSaveable { mutableStateOf(emptyList<RecipeDetails>()) }
 
                 Scaffold(
                     bottomBar = {
@@ -99,20 +104,33 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(Screen.SocialFeed.route) {
                             SocialFeedScreen(posts = sampleFeed) {
-                                navController.navigate("recipe_detail/$it")
+                                navController.navigate(RecipeDetailDest.createRoute(it))
+                            }
+                        }
+                        composable(Screen.MyRecipes.route) {
+                            MyRecipesScreen(recipes = myRecipes) {
+                                navController.navigate(RecipeDetailDest.createRoute(it))
                             }
                         }
                         composable(Screen.UserProfile.route) {
                             UserProfileScreen(user = sampleUserProfile) {
-                                navController.navigate("recipe_detail/$it")
+                                navController.navigate(RecipeDetailDest.createRoute(it))
                             }
                         }
                         composable(
                             route = RecipeDetailDest.route,
                             arguments = listOf(navArgument("recipeId") { type = NavType.StringType })
-                        ) {
-                            RecipeDetailScreen(recipe = sampleRecipeDetails) {
-                                Toast.makeText(context, "Recipe imported!", Toast.LENGTH_SHORT).show()
+                        ) { backStackEntry ->
+                            val recipeId = backStackEntry.arguments?.getString("recipeId")
+                            val recipe = allSampleRecipes.find { it.id == recipeId }
+                            RecipeDetailScreen(recipe = recipe) { rId ->
+                                val recipeToImport = allSampleRecipes.find { it.id == rId }
+                                if (recipeToImport != null && myRecipes.none { it.id == rId }) {
+                                    myRecipes = myRecipes + recipeToImport
+                                    Toast.makeText(context, "Recipe imported!", Toast.LENGTH_SHORT).show()
+                                } else if (recipeToImport != null) {
+                                    Toast.makeText(context, "Recipe already in your list.", Toast.LENGTH_SHORT).show()
+                                }
                                 navController.popBackStack()
                             }
                         }
