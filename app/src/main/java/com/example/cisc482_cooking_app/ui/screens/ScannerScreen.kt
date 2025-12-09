@@ -13,10 +13,13 @@ import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,12 +39,12 @@ import kotlinx.coroutines.withContext
 sealed interface ScannerScreenState {
     object Ready : ScannerScreenState
     object Loading : ScannerScreenState
-    data class Success(val ingredients: String) : ScannerScreenState
+    data class Success(val ingredients: List<String>) : ScannerScreenState
     data class Error(val message: String) : ScannerScreenState
 }
 
 @Composable
-fun ScannerScreen() {
+fun ScannerScreen(onAddToPantry: (List<String>) -> Unit) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
@@ -82,31 +85,33 @@ fun ScannerScreen() {
             Box(modifier = Modifier.fillMaxSize().background(Color.Black))
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            IconButton(onClick = {
-                screenState = ScannerScreenState.Loading
-                takePicture(controller, ContextCompat.getMainExecutor(context)) { bitmap ->
-                    coroutineScope.launch {
-                        val result = getIngredientsFromGemini(bitmap)
-                        screenState = if (result.isNotBlank()) {
-                            ScannerScreenState.Success(result)
-                        } else {
-                            ScannerScreenState.Error("Could not identify ingredients.")
+        if (screenState is ScannerScreenState.Ready) {
+             Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                IconButton(onClick = {
+                    screenState = ScannerScreenState.Loading
+                    takePicture(controller, ContextCompat.getMainExecutor(context)) { bitmap ->
+                        coroutineScope.launch {
+                            val result = getIngredientsFromGemini(bitmap)
+                            screenState = if (result.isNotBlank()) {
+                                ScannerScreenState.Success(result.split(",").map { it.trim() })
+                            } else {
+                                ScannerScreenState.Error("Could not identify ingredients.")
+                            }
                         }
                     }
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.CameraAlt,
+                        contentDescription = "Take picture",
+                        tint = AccentOrange
+                    )
                 }
-            }) {
-                Icon(
-                    imageVector = Icons.Default.CameraAlt,
-                    contentDescription = "Take picture",
-                    tint = AccentOrange
-                )
             }
         }
 
@@ -117,9 +122,11 @@ fun ScannerScreen() {
                 }
             }
             is ScannerScreenState.Success -> {
-                ResultView(message = state.ingredients) {
-                    screenState = ScannerScreenState.Ready
-                }
+                IngredientSelectionView(
+                    ingredients = state.ingredients, 
+                    onAdd = { onAddToPantry(it) },
+                    onCancel = { screenState = ScannerScreenState.Ready }
+                )
             }
             is ScannerScreenState.Error -> {
                  ResultView(message = state.message) {
@@ -166,6 +173,46 @@ private fun takePicture(
             }
         }
     )
+}
+
+@Composable
+private fun IngredientSelectionView(ingredients: List<String>, onAdd: (List<String>) -> Unit, onCancel: () -> Unit) {
+    var selectedIngredients by rememberSaveable { mutableStateOf(ingredients) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.8f))
+            .padding(16.dp)
+    ) {
+        Text("Add to Pantry", style = MaterialTheme.typography.headlineMedium, color = Color.White)
+        LazyColumn(modifier = Modifier.weight(1f)) {
+            items(ingredients) { ingredient ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = ingredient in selectedIngredients,
+                        onCheckedChange = {
+                            selectedIngredients = if (ingredient in selectedIngredients) {
+                                selectedIngredients - ingredient
+                            } else {
+                                selectedIngredients + ingredient
+                            }
+                        }
+                    )
+                    Text(ingredient, color = Color.White)
+                }
+            }
+        }
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            TextButton(onClick = onCancel) {
+                Text("Cancel")
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(onClick = { onAdd(selectedIngredients) }) {
+                Text("Add to Pantry")
+            }
+        }
+    }
 }
 
 @Composable

@@ -44,6 +44,8 @@ fun GenerateRecipeScreen(
     ingredientOptions: List<String> = emptyList(),
     supplyOptions: List<String> = emptyList(),
     generateRecipe: (suspend (GeminiRecipeRequest) -> GeminiResult<String>)? = null,
+    selectedIngredients: List<String>,
+    onSelectedIngredientsChange: (List<String>) -> Unit
 ) {
     var ingredientQuery by rememberSaveable { mutableStateOf("") }
     val filteredIngredients = ingredientOptions.filter { option ->
@@ -58,7 +60,6 @@ fun GenerateRecipeScreen(
     }
     val supplySuggestions = filteredSupplies.take(suggestionLimit)
     val showSupplySuggestions = supplyQuery.isNotBlank() && supplySuggestions.isNotEmpty()
-    var selectedIngredients by rememberSaveable { mutableStateOf(emptyList<String>()) }
     var selectedSupplies by rememberSaveable { mutableStateOf(emptyList<String>()) }
     var selectedAllergyNames by rememberSaveable { mutableStateOf(emptyList<String>()) }
     var customAllergyText by rememberSaveable { mutableStateOf("") }
@@ -123,7 +124,7 @@ fun GenerateRecipeScreen(
                                         .fillMaxWidth()
                                         .clickable {
                                             if (ingredient !in selectedIngredients) {
-                                                selectedIngredients = selectedIngredients + ingredient
+                                                onSelectedIngredientsChange(selectedIngredients + ingredient)
                                             }
                                             ingredientQuery = ""
                                         }
@@ -186,7 +187,7 @@ fun GenerateRecipeScreen(
                         )
                         TextButton(
                             onClick = {
-                                selectedIngredients = selectedIngredients.filterNot { it == ingredient }
+                                onSelectedIngredientsChange(selectedIngredients.filterNot { it == ingredient })
                             }
                         ) {
                             Text(text = "Remove")
@@ -476,6 +477,8 @@ fun GenerateRecipeScreenPreview() {
                     "Cutting Board"
                 ),
                 generateRecipe = { GeminiResult.Success("Sample recipe preview output") },
+                selectedIngredients = listOf("Chicken"),
+                onSelectedIngredientsChange = {}
             )
         }
     }

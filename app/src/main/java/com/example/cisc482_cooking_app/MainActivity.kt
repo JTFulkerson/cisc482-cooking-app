@@ -12,11 +12,13 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
@@ -60,6 +62,30 @@ class MainActivity : ComponentActivity() {
                 val items = listOf(Screen.GenerateRecipe, Screen.Scanner, Screen.SocialFeed, Screen.MyRecipes, Screen.UserProfile)
                 val context = LocalContext.current
                 var myRecipes by rememberSaveable { mutableStateOf(emptyList<RecipeDetails>()) }
+                var pantryIngredients by rememberSaveable { mutableStateOf(emptyList<String>()) }
+                var showPantryDialog by remember { mutableStateOf(false) }
+
+                if (showPantryDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showPantryDialog = false },
+                        title = { Text("Ingredients Added") },
+                        text = { Text("The selected ingredients have been added to your pantry.") },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    showPantryDialog = false
+                                    navController.navigate(Screen.GenerateRecipe.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
+                            ) {
+                                Text("OK")
+                            }
+                        }
+                    )
+                }
 
                 Scaffold(
                     bottomBar = {
@@ -92,15 +118,20 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable(Screen.GenerateRecipe.route) {
                             GenerateRecipeScreen(
-                                ingredientOptions = listOf("All-purpose Flour", "..."),
+                                ingredientOptions = allSampleRecipes.flatMap { it.ingredients }.distinct(),
                                 supplyOptions = listOf("Baking Sheet", "..."),
                                 generateRecipe = { request ->
                                     geminiRepository.generateRecipeFromSelections(request)
-                                }
+                                },
+                                selectedIngredients = pantryIngredients,
+                                onSelectedIngredientsChange = { pantryIngredients = it }
                             )
                         }
                         composable(Screen.Scanner.route) {
-                            ScannerScreen()
+                            ScannerScreen { ingredients ->
+                                pantryIngredients = (pantryIngredients + ingredients).distinct()
+                                showPantryDialog = true
+                            }
                         }
                         composable(Screen.SocialFeed.route) {
                             SocialFeedScreen(posts = sampleFeed) {
