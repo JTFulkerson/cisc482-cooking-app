@@ -6,8 +6,9 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -16,12 +17,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
@@ -33,6 +36,7 @@ import com.example.cisc482_cooking_app.model.User
 import com.example.cisc482_cooking_app.navigation.Screen
 import com.example.cisc482_cooking_app.ui.components.BottomNavigationBar
 import com.example.cisc482_cooking_app.ui.screens.BrowseScreen
+import com.example.cisc482_cooking_app.ui.screens.PantryScreen
 import com.example.cisc482_cooking_app.ui.screens.ProfileScreen
 import com.example.cisc482_cooking_app.ui.screens.RecipesScreen
 import com.example.cisc482_cooking_app.ui.screens.ScannerScreen
@@ -227,20 +231,21 @@ fun CollegeFridgeApp(
     val navController = rememberNavController()
 
     var userState by remember {
-        mutableStateOf(
-            User(
-                id = "12345",
-                name = "John",
-                email = "jtfulky@udel.edu",
-                hashedPassword = "a_very_secure_placeholder_hash", // Added required password hash
-                allergies = listOf(
-                    Allergy.SOY, Allergy.EGGS, Allergy.PEANUTS, Allergy.FISH, Allergy.SESAME,
-                    Allergy.SHELLFISH, Allergy.TREE_NUTS, Allergy.MILK, Allergy.WHEAT, Allergy.GLUTEN
-                ),
+                mutableStateOf(
+                    User(
+                        id = "12345",
+                        name = "John",
+                        email = "jtfulky@udel.edu",
+                        hashedPassword = "a_very_secure_placeholder_hash", // Added required password hash
+                        profilePictureUrl = "https://i.pravatar.cc/150?img=47",
+                        allergies = listOf(
+                            Allergy.SOY, Allergy.EGGS, Allergy.PEANUTS, Allergy.FISH, Allergy.SESAME,
+                            Allergy.SHELLFISH, Allergy.TREE_NUTS, Allergy.MILK, Allergy.WHEAT, Allergy.GLUTEN
+                        ),
 
-                customAllergy = null
-            )
-        )
+                        customAllergy = null
+                    )
+                )
     }
 
     Scaffold(
@@ -255,9 +260,19 @@ fun CollegeFridgeApp(
                         style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 24.sp)
                     )
                 },
-                navigationIcon = {
-                    IconButton(onClick = { /* Handle menu icon click */ }) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                actions = {
+                    IconButton(
+                        onClick = {
+                            navController.navigate(Screen.Profile.route) {
+                                launchSingleTop = true
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = "Open profile",
+                            modifier = Modifier.size(36.dp)
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Cream)
@@ -288,6 +303,7 @@ fun CollegeFridgeApp(
                     }
                 )
             }
+            composable(Screen.Pantry.route) { PantryScreen() }
 
             // Pass the corrected state and update function to ProfileScreen
             composable(Screen.Profile.route) {
