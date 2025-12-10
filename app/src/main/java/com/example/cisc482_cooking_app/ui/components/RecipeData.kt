@@ -17,3 +17,19 @@ val pBJData = RecipeData(
     description = "A classic school lunch",
     img = "pbj"
 )
+
+val tacoData = RecipeData(
+    name = "Tacos",
+    time = 30,
+    ingredients = listOf("Tortillas", "Ground Beef", "Lettuce", "Salsa", "Sour Cream"),
+    description = "A popular Mexican dish",
+    img = "tacos"
+)
+
+val omeletteData = RecipeData(
+    name = "Omelette",
+    time = 10,
+    ingredients = listOf("Eggs", "Cheese", "Breadcrumbs"),
+    description = "A simple breakfast",
+    img = "omelette"
+)
