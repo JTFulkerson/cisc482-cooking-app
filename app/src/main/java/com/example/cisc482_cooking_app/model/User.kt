@@ -9,7 +9,8 @@ enum class Allergy {
     PEANUTS,
     MILK,
     FISH,
-    WHEAT_GLUTEN,
+    WHEAT,
+    GLUTEN,
     SESAME,
     OTHER
 }

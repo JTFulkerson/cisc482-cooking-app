@@ -41,7 +41,7 @@ fun BottomNavigationBar(navController: NavController) {
         Screen.Scanner,
         Screen.Browse,
         Screen.Recipes,
-        Screen.Profile
+        Screen.Pantry
     )
     // Using filled icons for a bolder look, as seen in the image
     val icons = listOf(
@@ -71,7 +71,8 @@ fun BottomNavigationBar(navController: NavController) {
             val currentRoute = navBackStackEntry?.destination?.route
 
             items.forEachIndexed { index, screen ->
-                val isSelected = currentRoute == screen.route
+                val isSelected = currentRoute == screen.route ||
+                    (screen == Screen.Recipes && currentRoute == Screen.GenerateRecipe.route)
                 val backgroundColor = if (isSelected) EspressoBrown else Color.Transparent
                 val contentColor = if (isSelected) Cream else EspressoBrown
 
