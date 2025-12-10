@@ -5,7 +5,7 @@ class RecipeData(
     val time: Int,
     val ingredients: List<String>,
     val description: String,
-    val imgPath: String?
+    val img: String?
 ) {
 
 }
@@ -15,5 +15,5 @@ val pBJData = RecipeData(
     time = 5,
     ingredients = listOf("Peanut Butter", "Jelly", "Bread"),
     description = "A classic school lunch",
-    imgPath = "app/src/main/res/drawable/pbj.png"
+    img = "pbj"
 )

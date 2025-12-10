@@ -1,6 +1,7 @@
 package com.example.cisc482_cooking_app.ui.components
 
 import android.R.attr.alpha
+import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import com.example.cisc482_cooking_app.R
 import androidx.compose.foundation.Image
@@ -23,6 +24,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -30,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,6 +43,14 @@ import com.example.cisc482_cooking_app.ui.theme.LightGray
 
 @Composable
 fun RecipeCard(recipe: RecipeData) {
+    val context = LocalContext.current
+    val imageResId = remember(recipe.img) {
+        context.resources.getIdentifier(
+            recipe.img,
+            "drawable",
+            context.packageName
+        )
+    }
     CompositionLocalProvider(LocalContentColor provides LightGray) {
         Box(
             modifier = Modifier
@@ -48,7 +59,7 @@ fun RecipeCard(recipe: RecipeData) {
                 .background(EspressoBrown)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.pbj),
+                painter = painterResource(id = imageResId),
                 contentDescription = "Peanut Butter & Jelly",
                 modifier = Modifier
                     .fillMaxWidth()
