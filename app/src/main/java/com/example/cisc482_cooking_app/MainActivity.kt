@@ -42,7 +42,11 @@ import com.example.cisc482_cooking_app.ui.screens.RecipesScreen
 import com.example.cisc482_cooking_app.ui.screens.ScannerScreen
 import com.example.cisc482_cooking_app.data.ai.GeminiRepository
 import com.example.cisc482_cooking_app.data.ai.GeminiService
+import com.example.cisc482_cooking_app.ui.components.omeletteData
+import com.example.cisc482_cooking_app.ui.components.pBJData
+import com.example.cisc482_cooking_app.ui.components.tacoData
 import com.example.cisc482_cooking_app.ui.screens.GenerateRecipeScreen
+import com.example.cisc482_cooking_app.ui.screens.RecipeScreen
 import com.example.cisc482_cooking_app.ui.theme.CISC482CookingAppTheme
 import com.example.cisc482_cooking_app.ui.theme.Cream
 
@@ -288,7 +292,7 @@ fun CollegeFridgeApp(
             composable(Screen.Scanner.route) { ScannerScreen() }
             composable(Screen.Browse.route) { BrowseScreen() }
             composable(Screen.Recipes.route) {
-                RecipesScreen(
+                RecipeScreen(listOf(tacoData, omeletteData, pBJData),
                     onGenerateRecipe = {
                         navController.navigate(Screen.GenerateRecipe.route)
                     }

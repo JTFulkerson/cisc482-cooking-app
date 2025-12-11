@@ -9,7 +9,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
@@ -27,6 +31,8 @@ import com.example.cisc482_cooking_app.ui.components.RecipeData
 import com.example.cisc482_cooking_app.ui.components.omeletteData
 import com.example.cisc482_cooking_app.ui.components.pBJData
 import com.example.cisc482_cooking_app.ui.components.tacoData
+import com.example.cisc482_cooking_app.ui.theme.AccentOrange
+import com.example.cisc482_cooking_app.ui.theme.EspressoBrown
 import kotlin.collections.emptyList
 import kotlin.collections.mutableListOf
 
@@ -35,22 +41,35 @@ fun RecipeScreen(savedRecipes: List<RecipeData>, onGenerateRecipe: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(8.dp),
+            .padding(8.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = "Recipes:", modifier = Modifier
             .padding(8.dp),
             fontSize = 40.sp)
+        Spacer(modifier = Modifier.height(8.dp))
+        HorizontalDivider(thickness = 3.dp, color = EspressoBrown)
         Spacer(modifier = Modifier.height(16.dp))
 
+        Text(text = "Want something new? Generate a new recipe!")
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(onClick = onGenerateRecipe, colors = ButtonDefaults.buttonColors(
+            containerColor = AccentOrange,
+            contentColor = Color.White
+        )) {
+            Text(text = "Generate Recipe")
+        }
+
+
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(text = "Saved Recipes:", modifier = Modifier
+            .align(Alignment.Start)
+            .padding(8.dp))
         savedRecipes.forEach { recipe ->
             RecipeCard(recipe) }
 
-        Text(text = "Want something new? Generate a new recipe!")
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = onGenerateRecipe) {
-            Text(text = "Generate Recipe")
-        }
+
     }
 
 }
