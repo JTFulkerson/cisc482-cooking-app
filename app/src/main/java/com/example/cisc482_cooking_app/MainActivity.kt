@@ -28,9 +28,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.cisc482_cooking_app.model.Allergy
 import com.example.cisc482_cooking_app.model.User
 import com.example.cisc482_cooking_app.navigation.Screen
@@ -45,6 +47,7 @@ import com.example.cisc482_cooking_app.data.ai.GeminiService
 import com.example.cisc482_cooking_app.ui.components.omeletteData
 import com.example.cisc482_cooking_app.ui.components.pBJData
 import com.example.cisc482_cooking_app.ui.components.tacoData
+import com.example.cisc482_cooking_app.ui.screens.ComprehensiveRecipeScreen
 import com.example.cisc482_cooking_app.ui.screens.GenerateRecipeScreen
 import com.example.cisc482_cooking_app.ui.screens.RecipeScreen
 import com.example.cisc482_cooking_app.ui.theme.CISC482CookingAppTheme
@@ -251,6 +254,7 @@ fun CollegeFridgeApp(
                     )
                 )
     }
+    val recipes = listOf(tacoData, omeletteData, pBJData)
 
     Scaffold(
         containerColor = Cream,
@@ -292,9 +296,12 @@ fun CollegeFridgeApp(
             composable(Screen.Scanner.route) { ScannerScreen() }
             composable(Screen.Browse.route) { BrowseScreen() }
             composable(Screen.Recipes.route) {
-                RecipeScreen(listOf(tacoData, omeletteData, pBJData),
+                RecipeScreen(recipes,
                     onGenerateRecipe = {
                         navController.navigate(Screen.GenerateRecipe.route)
+                    },
+                    onStartClick = { recipeName ->
+                        navController.navigate("${Screen.ComprehensiveRecipe.route}/$recipeName")
                     }
                 )
             }
@@ -307,6 +314,20 @@ fun CollegeFridgeApp(
                     }
                 )
             }
+            composable(
+                route = "${Screen.ComprehensiveRecipe.route}/{recipeName}",
+                arguments = listOf(navArgument("recipeName") { type = NavType.StringType })
+            ) {
+                val recipeName = it.arguments?.getString("recipeName")
+                val recipe = recipes.find { it.name == recipeName }
+                if (recipe != null) {
+                    ComprehensiveRecipeScreen(
+                        recipe = recipe, 
+                        pantryIngredients = listOf("Bread", "Jelly"),
+                        onBackClick = { navController.popBackStack() }
+                    )
+                }
+            }
             composable(Screen.Pantry.route) { PantryScreen() }
 
             // Pass the corrected state and update function to ProfileScreen
@@ -318,6 +339,7 @@ fun CollegeFridgeApp(
                     }
                 )
             }
+
         }
     }
 }
