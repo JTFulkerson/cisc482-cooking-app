@@ -19,6 +19,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,12 +41,16 @@ import androidx.compose.ui.unit.sp
 import com.example.cisc482_cooking_app.model.Difficulty
 import com.example.cisc482_cooking_app.model.Recipe
 import com.example.cisc482_cooking_app.ui.components.ImagePreview
+import com.example.cisc482_cooking_app.ui.theme.AccentOrange
+import com.example.cisc482_cooking_app.ui.theme.Cream
+
 
 @Composable
 fun ComprehensiveRecipeScreen(
 	recipe: Recipe,
 	pantryIngredients: List<String>,
-	onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onSaveRecipe: ((Recipe) -> Unit)? = null
 ) {
 	val heroImageUrl = recipe.imageUrls.firstOrNull()
 	val ingredientsOwned = recipe.ingredients.count { it in pantryIngredients }
@@ -54,7 +60,7 @@ fun ComprehensiveRecipeScreen(
             .fillMaxSize()
             .padding(top = 16.dp, bottom = 16.dp)
             .verticalScroll(rememberScrollState())
-            .background(Color.White),
+            .background(Cream),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
@@ -175,6 +181,19 @@ fun ComprehensiveRecipeScreen(
             recipe.steps.forEachIndexed { index, step ->
                 Text(text = "${index + 1}. $step")
             }
+
+			if (onSaveRecipe != null) {
+				Spacer(modifier = Modifier.height(24.dp))
+                Button(
+                    onClick = { onSaveRecipe(recipe) },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = AccentOrange,
+                        contentColor = Color.White
+                    )
+                ) {
+					Text(text = "Save Recipe")
+				}
+			}
         }
     }
 }

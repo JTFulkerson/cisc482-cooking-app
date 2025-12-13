@@ -46,6 +46,7 @@ import com.example.cisc482_cooking_app.ui.screens.ScannerScreen
 import com.example.cisc482_cooking_app.data.ai.GeminiRepository
 import com.example.cisc482_cooking_app.data.ai.GeminiService
 import com.example.cisc482_cooking_app.data.InMemoryDb
+import com.example.cisc482_cooking_app.model.Recipe
 import com.example.cisc482_cooking_app.ui.screens.ComprehensiveRecipeScreen
 import com.example.cisc482_cooking_app.ui.screens.GenerateRecipeScreen
 import com.example.cisc482_cooking_app.ui.screens.RecipeScreen
@@ -244,6 +245,7 @@ fun CollegeFridgeApp(
         )
     }
     val activeUserImageUrl = activeUser.profilePictureUrl
+    var generatedRecipe by remember { mutableStateOf<Recipe?>(null) }
 
     Scaffold(
         containerColor = Cream,
@@ -296,7 +298,7 @@ fun CollegeFridgeApp(
             composable(Screen.Scanner.route) { ScannerScreen() }
             composable(Screen.Browse.route) { BrowseScreen() }
             composable(Screen.Recipes.route) {
-                val savedRecipes = remember { InMemoryDb.getRecipes() }
+                val savedRecipes = InMemoryDb.getRecipes()
                 RecipeScreen(
                     savedRecipes = savedRecipes,
                     onGenerateRecipe = {
@@ -313,6 +315,10 @@ fun CollegeFridgeApp(
                     supplyOptions = supplyOptions,
                     generateRecipe = { request ->
                         geminiRepository.generateRecipeFromSelections(request)
+                    },
+                    onRecipeGenerated = { recipe ->
+                        generatedRecipe = recipe
+                        navController.navigate(Screen.GeneratedRecipe.route)
                     }
                 )
             }
@@ -327,6 +333,26 @@ fun CollegeFridgeApp(
                         recipe = recipe,
                         pantryIngredients = listOf("Bread", "Jelly"),
                         onBackClick = { navController.popBackStack() }
+                    )
+                } else {
+                    navController.popBackStack()
+                }
+            }
+            composable(Screen.GeneratedRecipe.route) {
+                val pendingRecipe = generatedRecipe
+                if (pendingRecipe != null) {
+                    ComprehensiveRecipeScreen(
+                        recipe = pendingRecipe,
+                        pantryIngredients = listOf("Bread", "Jelly"),
+                        onBackClick = {
+                            generatedRecipe = null
+                            navController.popBackStack()
+                        },
+                        onSaveRecipe = { recipeToSave ->
+                            InMemoryDb.storeRecipe(recipeToSave)
+                            generatedRecipe = null
+                            navController.popBackStack()
+                        }
                     )
                 } else {
                     navController.popBackStack()

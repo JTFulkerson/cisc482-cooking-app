@@ -24,9 +24,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,16 +34,22 @@ import androidx.compose.ui.unit.dp
 import com.example.cisc482_cooking_app.data.ai.GeminiRecipeRequest
 import com.example.cisc482_cooking_app.data.ai.GeminiResult
 import com.example.cisc482_cooking_app.model.Allergy
+import com.example.cisc482_cooking_app.model.Difficulty
+import com.example.cisc482_cooking_app.model.Recipe
 import com.example.cisc482_cooking_app.ui.components.LoadingPopup
 import com.example.cisc482_cooking_app.ui.theme.AccentOrange
 import com.example.cisc482_cooking_app.ui.theme.CISC482CookingAppTheme
 import kotlinx.coroutines.launch
+import org.json.JSONArray
+import org.json.JSONObject
+import java.util.UUID
 
 @Composable
 fun GenerateRecipeScreen(
     ingredientOptions: List<String> = emptyList(),
     supplyOptions: List<String> = emptyList(),
-    generateRecipe: (suspend (GeminiRecipeRequest) -> GeminiResult<String>)? = null
+    generateRecipe: (suspend (GeminiRecipeRequest) -> GeminiResult<String>)? = null,
+    onRecipeGenerated: ((Recipe) -> Unit)? = null
 ) {
     var ingredientQuery by rememberSaveable { mutableStateOf("") }
     val filteredIngredients = ingredientOptions.filter { option ->
@@ -64,7 +70,7 @@ fun GenerateRecipeScreen(
     var customAllergyText by rememberSaveable { mutableStateOf("") }
     var additionalRequest by rememberSaveable { mutableStateOf("") }
     var isGenerating by rememberSaveable { mutableStateOf(false) }
-    var generatedRecipe by rememberSaveable { mutableStateOf<String?>(null) }
+    var generatedRecipePreview by rememberSaveable { mutableStateOf<String?>(null) }
     var generationError by rememberSaveable { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
     val allergies = Allergy.values().toList()
@@ -372,9 +378,21 @@ fun GenerateRecipeScreen(
                 coroutineScope.launch {
                     isGenerating = true
                     generationError = null
-                    generatedRecipe = null
+                    generatedRecipePreview = null
                     when (val result = generator.invoke(request)) {
-                        is GeminiResult.Success -> generatedRecipe = result.data
+                        is GeminiResult.Success -> {
+                            val parsedRecipe = parseRecipeJson(result.data)
+                            if (parsedRecipe != null) {
+                                if (onRecipeGenerated != null) {
+                                    onRecipeGenerated(parsedRecipe)
+                                } else {
+                                    generatedRecipePreview = parsedRecipe.title
+                                }
+                            } else {
+                                generationError = "Unable to parse recipe output."
+                                generatedRecipePreview = result.data
+                            }
+                        }
                         is GeminiResult.Error -> generationError = result.message
                     }
                     isGenerating = false
@@ -393,7 +411,6 @@ fun GenerateRecipeScreen(
 
         when {
             isGenerating -> LoadingPopup()
-
             generationError != null -> {
                 Text(
                     text = generationError ?: "",
@@ -401,15 +418,14 @@ fun GenerateRecipeScreen(
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
-
-            generatedRecipe != null -> {
+            generatedRecipePreview != null -> {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     tonalElevation = 2.dp,
                     shape = MaterialTheme.shapes.medium
                 ) {
                     Text(
-                        text = generatedRecipe.orEmpty(),
+                        text = generatedRecipePreview.orEmpty(),
                         modifier = Modifier.padding(16.dp),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface
@@ -455,6 +471,39 @@ private val Allergy.displayName: String
         .split(" ")
         .joinToString(" ") { word -> word.replaceFirstChar { it.uppercase() } }
 
+private fun parseRecipeJson(raw: String): Recipe? = runCatching {
+    val json = JSONObject(raw)
+    val id = json.optString("id").ifBlank { UUID.randomUUID().toString() }
+    val title = json.getString("title")
+    val description = json.getString("description")
+    val ingredients = json.getJSONArray("ingredients").toStringList()
+    val tools = json.optJSONArray("tools")?.toStringList() ?: emptyList()
+    val steps = json.getJSONArray("steps").toStringList()
+    val images = json.optJSONArray("imageUrls")?.toStringList() ?: emptyList()
+    val totalTime = json.getInt("totalTimeMinutes")
+    val rating = json.optDouble("rating", 4.0).toFloat()
+    val difficulty = Difficulty.valueOf(json.getString("difficulty").uppercase())
+
+    Recipe(
+        id = id,
+        title = title,
+        description = description,
+        ingredients = ingredients,
+        tools = tools,
+        steps = steps,
+        imageUrls = images,
+        totalTimeMinutes = totalTime,
+        rating = rating,
+        difficulty = difficulty
+    )
+}.getOrNull()
+
+private fun JSONArray.toStringList(): List<String> = buildList(length()) {
+    for (index in 0 until length()) {
+        add(getString(index))
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun GenerateRecipeScreenPreview() {
@@ -475,7 +524,22 @@ fun GenerateRecipeScreenPreview() {
                     "Saucepan",
                     "Cutting Board"
                 ),
-                generateRecipe = { GeminiResult.Success("Sample recipe preview output") }
+                generateRecipe = {
+                    GeminiResult.Success(
+                        "{" +
+                            "\"id\":\"demo\"," +
+                            "\"title\":\"Demo Recipe\"," +
+                            "\"description\":\"Tasty dish\"," +
+                            "\"ingredients\":[\"Item 1\",\"Item 2\",\"Item 3\"]," +
+                            "\"tools\":[\"Pan\"]," +
+                            "\"steps\":[\"Do thing\",\"Serve\"]," +
+                            "\"imageUrls\":[]," +
+                            "\"totalTimeMinutes\":20," +
+                            "\"rating\":4.5," +
+                            "\"difficulty\":\"EASY\"" +
+                        "}"
+                    )
+                }
             )
         }
     }
