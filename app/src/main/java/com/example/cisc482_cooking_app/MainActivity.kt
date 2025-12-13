@@ -302,8 +302,8 @@ fun CollegeFridgeApp(
                     onGenerateRecipe = {
                         navController.navigate(Screen.GenerateRecipe.route)
                     },
-                    onStartClick = { recipeName ->
-                        navController.navigate("${Screen.ComprehensiveRecipe.route}/$recipeName")
+                    onStartClick = { recipeId ->
+                        navController.navigate("${Screen.ComprehensiveRecipe.route}/$recipeId")
                     }
                 )
             }
@@ -317,17 +317,19 @@ fun CollegeFridgeApp(
                 )
             }
             composable(
-                route = "${Screen.ComprehensiveRecipe.route}/{recipeName}",
-                arguments = listOf(navArgument("recipeName") { type = NavType.StringType })
-            ) {
-                val recipeName = it.arguments?.getString("recipeName")
-                val recipe = recipes.find { it.name == recipeName }
+                route = "${Screen.ComprehensiveRecipe.route}/{recipeId}",
+                arguments = listOf(navArgument("recipeId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val recipeId = backStackEntry.arguments?.getString("recipeId")
+                val recipe = recipeId?.let { InMemoryDb.getRecipe(it) }
                 if (recipe != null) {
                     ComprehensiveRecipeScreen(
-                        recipe = recipe, 
+                        recipe = recipe,
                         pantryIngredients = listOf("Bread", "Jelly"),
                         onBackClick = { navController.popBackStack() }
                     )
+                } else {
+                    navController.popBackStack()
                 }
             }
             composable(Screen.Pantry.route) { PantryScreen() }

@@ -1,7 +1,6 @@
 package com.example.cisc482_cooking_app.ui.screens
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,34 +26,28 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.cisc482_cooking_app.ui.components.RecipeData
-import com.example.cisc482_cooking_app.ui.components.pBJData
+import com.example.cisc482_cooking_app.model.Difficulty
+import com.example.cisc482_cooking_app.model.Recipe
+import com.example.cisc482_cooking_app.ui.components.ImagePreview
 
 @Composable
-fun ComprehensiveRecipeScreen(recipe: RecipeData, pantryIngredients: List<String>, onBackClick: () -> Unit) {
-    val context = LocalContext.current
-    val imageResId = remember(recipe.img) {
-        context.resources.getIdentifier(
-            recipe.img,
-            "drawable",
-            context.packageName
-        )
-    }
-
-    val ingredientsOwned = recipe.ingredients.count { it in pantryIngredients }
+fun ComprehensiveRecipeScreen(
+	recipe: Recipe,
+	pantryIngredients: List<String>,
+	onBackClick: () -> Unit
+) {
+	val heroImageUrl = recipe.imageUrls.firstOrNull()
+	val ingredientsOwned = recipe.ingredients.count { it in pantryIngredients }
 
     Column(
         modifier = Modifier
@@ -74,18 +67,28 @@ fun ComprehensiveRecipeScreen(recipe: RecipeData, pantryIngredients: List<String
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
-                painter = painterResource(id = imageResId),
-                contentDescription = recipe.name,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .clip(shape = RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
-            )
+            if (heroImageUrl != null) {
+                ImagePreview(
+                    imageUrl = heroImageUrl,
+                    contentDescription = recipe.title,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(shape = RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(shape = RoundedCornerShape(8.dp)),
+                    color = Color.LightGray
+                ) {}
+            }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = recipe.name,
+                text = recipe.title,
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
@@ -106,7 +109,7 @@ fun ComprehensiveRecipeScreen(recipe: RecipeData, pantryIngredients: List<String
                     contentDescription = "Time to cook",
                     modifier = Modifier.size(48.dp)
                 )
-                Text(text = " ${recipe.time} min", fontSize = 18.sp)
+                Text(text = " ${recipe.totalTimeMinutes} min", fontSize = 18.sp)
             }
             Row(verticalAlignment = Alignment.CenterVertically){
                 Surface(
@@ -180,5 +183,21 @@ fun ComprehensiveRecipeScreen(recipe: RecipeData, pantryIngredients: List<String
 @Composable
 fun PreviewComprehensiveRecipeScreen() {
     val pantry = listOf("Bread", "Jelly")
-    ComprehensiveRecipeScreen(pBJData, pantry, onBackClick = {})
+    val previewRecipe = Recipe(
+        id = "preview",
+        title = "Preview PB&J",
+        description = "Classic comfort food",
+        ingredients = listOf("Bread", "Peanut Butter", "Jelly"),
+        tools = listOf("Knife", "Plate"),
+        steps = listOf(
+            "Toast bread lightly.",
+            "Spread peanut butter.",
+            "Add jelly and serve."
+        ),
+        imageUrls = listOf("https://static01.nyt.com/images/2024/09/27/multimedia/AS-Griddled-PBJ-qljg/AS-Griddled-PBJ-qljg-googleFourByThree.jpg"),
+        totalTimeMinutes = 5,
+        rating = 4.5f,
+        difficulty = Difficulty.EASY
+    )
+    ComprehensiveRecipeScreen(previewRecipe, pantry, onBackClick = {})
 }

@@ -145,7 +145,7 @@ fun RecipeCard(recipe: Recipe, onStartClick: (String) -> Unit) {
                                 modifier = Modifier.padding(start = 8.dp, top = 8.dp)
                             )
                             Row(modifier = Modifier.height(IntrinsicSize.Min)){
-                                Button(onClick = { onStartClick(recipe.name) },
+                                Button(onClick = { onStartClick(recipe.id) },
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = AccentOrange,
                                         contentColor = Color.White)) {
