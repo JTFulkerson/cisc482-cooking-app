@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -26,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cisc482_cooking_app.model.Allergy
 import com.example.cisc482_cooking_app.model.User
+import com.example.cisc482_cooking_app.ui.components.ImagePreview
 import com.example.cisc482_cooking_app.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,6 +45,7 @@ fun ProfileScreen(
     var customAllergyInput by remember { mutableStateOf(user.customAllergy ?: "") }
 
     var showDialog by remember { mutableStateOf(false) }
+    val profileImageUrl = user.profilePictureUrl
 
     // If parent passes a new user, sync the local UI state with it
     LaunchedEffect(user) {
@@ -78,12 +81,21 @@ fun ProfileScreen(
                     .clip(CircleShape)
                     .background(Color(0xFFFADADD))
             ) {
-                Icon(
-                    imageVector = Icons.Default.AccountCircle,
-                    contentDescription = "Profile Picture",
-                    modifier = Modifier.size(150.dp),
-                    tint = EspressoBrown
-                )
+                if (profileImageUrl != null) {
+                    ImagePreview(
+                        imageUrl = profileImageUrl,
+                        contentDescription = "${user.name} profile picture",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = "Profile Picture",
+                        modifier = Modifier.size(150.dp),
+                        tint = EspressoBrown
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(24.dp))
         }
