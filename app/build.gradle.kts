@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation("androidx.compose.material:material-icons-extended:1.6.7")
+    implementation(libs.coil.compose)
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
     testImplementation(libs.junit)

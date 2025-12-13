@@ -9,6 +9,7 @@ data class Recipe(
     val title: String,
     val description: String,
     val ingredients: List<String>,
+    val tools: List<String> = emptyList(),
     val steps: List<String>,
 
     // Now multiple images instead of one

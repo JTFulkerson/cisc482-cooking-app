@@ -1,12 +1,8 @@
 package com.example.cisc482_cooking_app.ui.components
 
-import android.R.attr.alpha
-import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
-import com.example.cisc482_cooking_app.R
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -44,28 +40,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.cisc482_cooking_app.ui.theme.Cream
+import com.example.cisc482_cooking_app.model.Recipe
 import com.example.cisc482_cooking_app.ui.theme.EspressoBrown
 import com.example.cisc482_cooking_app.ui.theme.LightGray
 
 @Composable
-fun RecipeCard(recipe: RecipeData) {
-    val context = LocalContext.current
+fun RecipeCard(recipe: Recipe) {
     var isExpanded by remember { mutableStateOf(false) }
     val rotation: Float by animateFloatAsState(if (isExpanded) 270f else 180f, label = "")
-    val imageResId = remember(recipe.img) {
-        context.resources.getIdentifier(
-            recipe.img,
-            "drawable",
-            context.packageName
-        )
-    }
+    val imageUrl = recipe.imageUrls.firstOrNull()
+
     CompositionLocalProvider(LocalContentColor provides LightGray) {
         Box(
             modifier = Modifier
@@ -75,15 +61,17 @@ fun RecipeCard(recipe: RecipeData) {
                 .background(EspressoBrown)
                 .clickable { isExpanded = !isExpanded }
         ) {
-            Image(
-                painter = painterResource(id = imageResId),
-                contentDescription = "Peanut Butter & Jelly",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .matchParentSize(),
-                contentScale = ContentScale.Crop,
-                alpha = .4f
-            )
+            if (imageUrl != null) {
+                ImagePreview(
+                    imageUrl = imageUrl,
+                    contentDescription = recipe.title,
+                    modifier = Modifier
+                        .matchParentSize()
+                        .alpha(0.45f),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
@@ -92,7 +80,7 @@ fun RecipeCard(recipe: RecipeData) {
                     .padding(8.dp)
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(recipe.name, fontSize = 30.sp)
+                    Text(recipe.title, fontSize = 30.sp)
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Surface(
                             border = BorderStroke(2.dp, Color.Green),
@@ -120,24 +108,28 @@ fun RecipeCard(recipe: RecipeData) {
                                 .padding(8.dp)
                                 .size(30.dp)
                         )
-                        Text(text = "${recipe.time} min")
+                        Text(text = "${recipe.totalTimeMinutes} min")
                     }
                     AnimatedVisibility(visible = isExpanded) {
-                        HorizontalDivider(modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp),
+                        HorizontalDivider(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp),
                             color = LightGray,
-                            thickness = 2.dp)
+                            thickness = 2.dp
+                        )
                         Column {
-                            Row(modifier = Modifier.height(IntrinsicSize.Min)){
+                            Row(modifier = Modifier.height(IntrinsicSize.Min)) {
                                 Column(modifier = Modifier.padding(8.dp)) {
                                     recipe.ingredients.forEach { ingredient ->
                                         Text(text = "* $ingredient")
                                     }
                                 }
-                                VerticalDivider(modifier = Modifier.fillMaxHeight(),
+                                VerticalDivider(
+                                    modifier = Modifier.fillMaxHeight(),
                                     color = LightGray,
-                                    thickness = 2.dp,)
+                                    thickness = 2.dp
+                                )
                                 Column(modifier = Modifier.padding(8.dp)) {
                                     recipe.tools.forEach { tool ->
                                         Text(text = "* $tool")
@@ -160,9 +152,4 @@ fun RecipeCard(recipe: RecipeData) {
             }
         }
     }
-}
-@Preview(showBackground = true)
-@Composable
-fun PreviewRecipeCard(){
-    RecipeCard(pBJData)
 }
