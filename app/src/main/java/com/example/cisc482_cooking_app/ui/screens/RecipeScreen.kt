@@ -23,7 +23,7 @@ import com.example.cisc482_cooking_app.ui.theme.AccentOrange
 import com.example.cisc482_cooking_app.ui.theme.EspressoBrown
 
 @Composable
-fun RecipeScreen(savedRecipes: List<Recipe>, onGenerateRecipe: () -> Unit) {
+fun RecipeScreen(savedRecipes: List<Recipe>, onGenerateRecipe: () -> Unit, onStartClick: (String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -53,7 +53,7 @@ fun RecipeScreen(savedRecipes: List<Recipe>, onGenerateRecipe: () -> Unit) {
             .align(Alignment.Start)
             .padding(8.dp))
         savedRecipes.forEach { recipe ->
-            RecipeCard(recipe) }
+            RecipeCard(recipe, onStartClick) }
 
 
     }

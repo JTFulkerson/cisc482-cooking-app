@@ -21,6 +21,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.ArrowCircleRight
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -42,12 +45,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.cisc482_cooking_app.ui.theme.AccentOrange
 import com.example.cisc482_cooking_app.model.Recipe
 import com.example.cisc482_cooking_app.ui.theme.EspressoBrown
 import com.example.cisc482_cooking_app.ui.theme.LightGray
 
 @Composable
-fun RecipeCard(recipe: Recipe) {
+fun RecipeCard(recipe: Recipe, onStartClick: (String) -> Unit) {
     var isExpanded by remember { mutableStateOf(false) }
     val rotation: Float by animateFloatAsState(if (isExpanded) 270f else 180f, label = "")
     val imageUrl = recipe.imageUrls.firstOrNull()
@@ -83,12 +87,12 @@ fun RecipeCard(recipe: Recipe) {
                     Text(recipe.title, fontSize = 30.sp)
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Surface(
-                            border = BorderStroke(2.dp, Color.Green),
-                            color = Color.Green.copy(alpha = 0.3f),
                             modifier = Modifier
                                 .padding(8.dp)
-                                .size(30.dp)
-                                .clip(CircleShape)
+                                .size(30.dp),
+                            shape = CircleShape,
+                            border = BorderStroke(2.dp, Color.Green),
+                            color = Color.Green.copy(alpha = 0.3f)
                         ) {
                             Box(
                                 contentAlignment = Alignment.Center,
@@ -122,7 +126,7 @@ fun RecipeCard(recipe: Recipe) {
                             Row(modifier = Modifier.height(IntrinsicSize.Min)) {
                                 Column(modifier = Modifier.padding(8.dp)) {
                                     recipe.ingredients.forEach { ingredient ->
-                                        Text(text = "* $ingredient")
+                                        Text(text = "- $ingredient")
                                     }
                                 }
                                 VerticalDivider(
@@ -132,7 +136,7 @@ fun RecipeCard(recipe: Recipe) {
                                 )
                                 Column(modifier = Modifier.padding(8.dp)) {
                                     recipe.tools.forEach { tool ->
-                                        Text(text = "* $tool")
+                                        Text(text = "- $tool")
                                     }
                                 }
                             }
@@ -140,6 +144,24 @@ fun RecipeCard(recipe: Recipe) {
                                 text = recipe.description,
                                 modifier = Modifier.padding(start = 8.dp, top = 8.dp)
                             )
+                            Row(modifier = Modifier.height(IntrinsicSize.Min)){
+                                Button(onClick = { onStartClick(recipe.name) },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = AccentOrange,
+                                        contentColor = Color.White)) {
+                                    Row{
+                                        Text(text = "Start")
+                                        Icon(
+                                            imageVector = Icons.Default.ArrowCircleRight,
+                                            contentDescription = "Start Button",
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
+
+                                }
+
+
+                            }
                         }
                     }
                 }
