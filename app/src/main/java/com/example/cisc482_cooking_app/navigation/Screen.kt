@@ -7,4 +7,5 @@ sealed class Screen(val route: String) {
     object GenerateRecipe : Screen("generate_recipe")
     object Pantry : Screen("pantry")
     object Profile : Screen("profile")
+    object ComprehensiveRecipe : Screen("comprehensive_recipe")
 }

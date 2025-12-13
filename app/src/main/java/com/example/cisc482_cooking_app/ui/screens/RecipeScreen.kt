@@ -37,7 +37,7 @@ import kotlin.collections.emptyList
 import kotlin.collections.mutableListOf
 
 @Composable
-fun RecipeScreen(savedRecipes: List<RecipeData>, onGenerateRecipe: () -> Unit) {
+fun RecipeScreen(savedRecipes: List<RecipeData>, onGenerateRecipe: () -> Unit, onStartClick: (String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -67,7 +67,7 @@ fun RecipeScreen(savedRecipes: List<RecipeData>, onGenerateRecipe: () -> Unit) {
             .align(Alignment.Start)
             .padding(8.dp))
         savedRecipes.forEach { recipe ->
-            RecipeCard(recipe) }
+            RecipeCard(recipe, onStartClick) }
 
 
     }
@@ -77,5 +77,5 @@ fun RecipeScreen(savedRecipes: List<RecipeData>, onGenerateRecipe: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewRecipeScreen(){
-    RecipeScreen(listOf(tacoData, omeletteData, pBJData),{})
+    RecipeScreen(listOf(tacoData, omeletteData, pBJData), {}, {})
 }

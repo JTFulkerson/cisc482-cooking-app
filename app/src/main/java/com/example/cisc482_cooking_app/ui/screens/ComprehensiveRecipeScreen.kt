@@ -1,0 +1,184 @@
+package com.example.cisc482_cooking_app.ui.screens
+
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.cisc482_cooking_app.ui.components.RecipeData
+import com.example.cisc482_cooking_app.ui.components.pBJData
+
+@Composable
+fun ComprehensiveRecipeScreen(recipe: RecipeData, pantryIngredients: List<String>, onBackClick: () -> Unit) {
+    val context = LocalContext.current
+    val imageResId = remember(recipe.img) {
+        context.resources.getIdentifier(
+            recipe.img,
+            "drawable",
+            context.packageName
+        )
+    }
+
+    val ingredientsOwned = recipe.ingredients.count { it in pantryIngredients }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 16.dp, bottom = 16.dp)
+            .verticalScroll(rememberScrollState())
+            .background(Color.White),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            IconButton(onClick = onBackClick, modifier = Modifier.align(Alignment.CenterStart)) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+            }
+        }
+        // Title and Image
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(id = imageResId),
+                contentDescription = recipe.name,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clip(shape = RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = recipe.name,
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Time and Ingredient Count
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.AccessTime,
+                    contentDescription = "Time to cook",
+                    modifier = Modifier.size(48.dp)
+                )
+                Text(text = " ${recipe.time} min", fontSize = 18.sp)
+            }
+            Row(verticalAlignment = Alignment.CenterVertically){
+                Surface(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .size(50.dp),
+                    shape = CircleShape,
+                    border = BorderStroke(2.dp, Color.Green),
+                    color = Color.Green.copy(alpha = 0.3f)
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Text(text = "$ingredientsOwned/${recipe.ingredients.size}", fontSize = 18.sp)
+                    }
+
+                }
+                Text(text = "Ingredients", fontSize = 18.sp)
+            }
+
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        HorizontalDivider()
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Ingredients and Tools
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = "Ingredients", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(8.dp))
+                recipe.ingredients.forEach { ingredient ->
+                    Text(text = "- $ingredient")
+                }
+            }
+            VerticalDivider()
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = "Tools", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(8.dp))
+                recipe.tools.forEach { tool ->
+                    Text(text = "- $tool")
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        HorizontalDivider()
+        Spacer(modifier = Modifier.height(16.dp))
+
+
+        // Steps
+        Column(modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)) {
+            Text(text = "Steps", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(8.dp))
+            recipe.steps.forEachIndexed { index, step ->
+                Text(text = "${index + 1}. $step")
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewComprehensiveRecipeScreen() {
+    val pantry = listOf("Bread", "Jelly")
+    ComprehensiveRecipeScreen(pBJData, pantry, onBackClick = {})
+}
