@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -26,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cisc482_cooking_app.model.Allergy
 import com.example.cisc482_cooking_app.model.User
+import com.example.cisc482_cooking_app.ui.components.ImagePreview
 import com.example.cisc482_cooking_app.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,6 +45,7 @@ fun ProfileScreen(
     var customAllergyInput by remember { mutableStateOf(user.customAllergy ?: "") }
 
     var showDialog by remember { mutableStateOf(false) }
+    val profileImageUrl = user.profilePictureUrl
 
     // If parent passes a new user, sync the local UI state with it
     LaunchedEffect(user) {
@@ -62,9 +65,7 @@ fun ProfileScreen(
     val isSaveButtonEnabled = !isNameInvalid && !isEmailInvalid && !isCustomAllergyInvalid
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Cream),
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         contentPadding = PaddingValues(bottom = 24.dp)
     ) {
@@ -78,28 +79,27 @@ fun ProfileScreen(
                     .clip(CircleShape)
                     .background(Color(0xFFFADADD))
             ) {
-                Icon(
-                    imageVector = Icons.Default.AccountCircle,
-                    contentDescription = "Profile Picture",
-                    modifier = Modifier.size(150.dp),
-                    tint = EspressoBrown
-                )
+                if (profileImageUrl != null) {
+                    ImagePreview(
+                        imageUrl = profileImageUrl,
+                        contentDescription = "${user.name} profile picture",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = "Profile Picture",
+                        modifier = Modifier.size(150.dp),
+                        tint = EspressoBrown
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(24.dp))
         }
 
         // ---------- Form fields ----------
         item {
-            val textFieldColors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = LightGray,
-                unfocusedBorderColor = LightGray,
-                focusedLabelColor = AccentOrange,
-                unfocusedLabelColor = AccentOrange,
-                cursorColor = AccentOrange,
-                unfocusedContainerColor = Color.White,
-                focusedContainerColor = Color.White
-            )
-
             // EMAIL
             OutlinedTextField(
                 value = emailInput,
@@ -108,7 +108,6 @@ fun ProfileScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp),
-                colors = textFieldColors,
                 isError = isEmailInvalid,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
             )
@@ -134,8 +133,7 @@ fun ProfileScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-                colors = textFieldColors
+                    .padding(horizontal = 24.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -147,7 +145,6 @@ fun ProfileScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp),
-                colors = textFieldColors,
                 isError = isNameInvalid
             )
             if (isNameInvalid) {
@@ -237,7 +234,7 @@ fun ProfileScreen(
                     Text("Ok")
                 }
             },
-            containerColor = Color.White
+            containerColor = MaterialTheme.colorScheme.surface
         )
     }
 }
@@ -259,8 +256,8 @@ fun AllergiesSection(
             .fillMaxWidth()
             .padding(horizontal = 24.dp),
         shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, LightGray),
-        color = Color.White
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
+        color = Cream
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -291,12 +288,7 @@ fun AllergiesSection(
                             onValueChange = onCustomAllergyTextChange,
                             label = { Text("Other") },
                             modifier = Modifier.weight(1f),
-                            isError = isCustomAllergyInvalid,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = AccentOrange,
-                                unfocusedBorderColor = LightGray,
-                                cursorColor = AccentOrange
-                            )
+                            isError = isCustomAllergyInvalid
                         )
                     } else {
                         // Otherwise, display the second allergy checkbox as normal
@@ -328,11 +320,7 @@ fun AllergyCheckbox(
     ) {
         Checkbox(
             checked = isChecked,
-            onCheckedChange = onCheckedChange,
-            colors = CheckboxDefaults.colors(
-                checkedColor = AccentOrange,
-                uncheckedColor = EspressoBrown
-            )
+            onCheckedChange = onCheckedChange
         )
         val allergyText = allergy.name
             .replace('_', ' ')

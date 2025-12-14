@@ -140,21 +140,28 @@ data class GeminiRecipeRequest(
         if (!customRequest.isNullOrBlank()) {
             appendLine("Additional request: ${customRequest.trim()}")
         }
-        appendLine("Return ONLY valid minified JSON with no markdown fences or commentary.")
-        appendLine("The JSON must map 1:1 to this Recipe model:")
-        appendLine("{" +
-            "\"id\": \"unique-id-string\"," +
-            "\"title\": \"short recipe title\"," +
-            "\"description\": \"brief summary\"," +
-            "\"ingredients\": [\"ingredient detail\"]," +
-            "\"steps\": [\"step instructions\"]," +
-            "\"imageUrls\": [\"https://example.com/image.jpg\"]," +
-            "\"totalTimeMinutes\": 45," +
-            "\"rating\": 4.5," +
-            "\"difficulty\": \"EASY|MEDIUM|HARD\"" +
-            "}")
-        appendLine("Constraints: ingredients and steps must each list at least 3 entries; imageUrls can be empty but prefer at least one plausible https URL; totalTimeMinutes must be a positive integer; rating must be a number between 0 and 5; difficulty must be exactly one of EASY, MEDIUM, HARD.")
-        append("Do not wrap the JSON in prose; respond with the object only.")
+        appendLine("Respond with a single JSON object EXACTLY matching this schema (no code fences, no prose, do not wrap the JSON in quotes):")
+        appendLine(
+            "{" +
+                "\n  \"id\": \"string\"," +
+                "\n  \"title\": \"string\"," +
+                "\n  \"description\": \"string\"," +
+                "\n  \"ingredients\": [\"string\", \"string\", \"string\"]," +
+                "\n  \"tools\": [\"string\", \"string\"]," +
+                "\n  \"steps\": [\"string\", \"string\", \"string\"]," +
+                "\n  \"imageUrls\": [\"https://example.com/photo.jpg\"]," +
+                "\n  \"totalTimeMinutes\": 30," +
+                "\n  \"rating\": 4.7," +
+                "\n  \"difficulty\": \"EASY|MEDIUM|HARD\"" +
+                "\n}"
+        )
+        appendLine("Rules:")
+        appendLine("1. The first non-whitespace character MUST be '{' and the last MUST be '}'.")
+        appendLine("2. Do not escape quotes inside the JSON (e.g., write \"title\": \"...\", not \"\\\"title\\\"\").")
+        appendLine("3. ingredients and steps must each contain at least 3 entries; tools may be empty but prefer at least 1 item.")
+        appendLine("4. imageUrls must contain at least one https URL. When unsure, supply exactly one photo URL using https://loremflickr.com/1200/800/{slug}, where {slug} is the recipe title or hero ingredient in lowercase with spaces replaced by hyphens (e.g., 'lemon-pasta'). This keeps the photo relevant yet always reachable.")
+        appendLine("5. totalTimeMinutes must be a positive integer; rating must be between 0 and 5; difficulty must be exactly EASY, MEDIUM, or HARD.")
+        append("Return only the JSON object with no commentary.")
     }
 }
 

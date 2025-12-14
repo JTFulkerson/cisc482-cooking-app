@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,6 +24,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.font.FontWeight
@@ -33,20 +36,18 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.cisc482_cooking_app.model.Allergy
-import com.example.cisc482_cooking_app.model.User
 import com.example.cisc482_cooking_app.navigation.Screen
 import com.example.cisc482_cooking_app.ui.components.BottomNavigationBar
+import com.example.cisc482_cooking_app.ui.components.ImagePreview
 import com.example.cisc482_cooking_app.ui.screens.BrowseScreen
+import com.example.cisc482_cooking_app.ui.screens.ManualRecipeScreen
 import com.example.cisc482_cooking_app.ui.screens.PantryScreen
 import com.example.cisc482_cooking_app.ui.screens.ProfileScreen
-import com.example.cisc482_cooking_app.ui.screens.RecipesScreen
 import com.example.cisc482_cooking_app.ui.screens.ScannerScreen
 import com.example.cisc482_cooking_app.data.ai.GeminiRepository
 import com.example.cisc482_cooking_app.data.ai.GeminiService
-import com.example.cisc482_cooking_app.ui.components.omeletteData
-import com.example.cisc482_cooking_app.ui.components.pBJData
-import com.example.cisc482_cooking_app.ui.components.tacoData
+import com.example.cisc482_cooking_app.data.InMemoryDb
+import com.example.cisc482_cooking_app.model.Recipe
 import com.example.cisc482_cooking_app.ui.screens.ComprehensiveRecipeScreen
 import com.example.cisc482_cooking_app.ui.screens.GenerateRecipeScreen
 import com.example.cisc482_cooking_app.ui.screens.RecipeScreen
@@ -56,6 +57,7 @@ import com.example.cisc482_cooking_app.ui.theme.Cream
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        InMemoryDb.seedData()
         setContent {
             CISC482CookingAppTheme {
                 val geminiRepository = remember {
@@ -237,24 +239,14 @@ fun CollegeFridgeApp(
 ) {
     val navController = rememberNavController()
 
-    var userState by remember {
-                mutableStateOf(
-                    User(
-                        id = "12345",
-                        name = "John",
-                        email = "jtfulky@udel.edu",
-                        hashedPassword = "a_very_secure_placeholder_hash", // Added required password hash
-                        profilePictureUrl = "https://i.pravatar.cc/150?img=47",
-                        allergies = listOf(
-                            Allergy.SOY, Allergy.EGGS, Allergy.PEANUTS, Allergy.FISH, Allergy.SESAME,
-                            Allergy.SHELLFISH, Allergy.TREE_NUTS, Allergy.MILK, Allergy.WHEAT, Allergy.GLUTEN
-                        ),
-
-                        customAllergy = null
-                    )
-                )
+    var activeUser by remember {
+        mutableStateOf(
+            InMemoryDb.getUsers().firstOrNull()
+                ?: error("No users available. Ensure InMemoryDb.seedData() ran before composing.")
+        )
     }
-    val recipes = listOf(tacoData, omeletteData, pBJData)
+    val activeUserImageUrl = activeUser.profilePictureUrl
+    var generatedRecipe by remember { mutableStateOf<Recipe?>(null) }
 
     Scaffold(
         containerColor = Cream,
@@ -276,11 +268,22 @@ fun CollegeFridgeApp(
                             }
                         }
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.AccountCircle,
-                            contentDescription = "Open profile",
-                            modifier = Modifier.size(36.dp)
-                        )
+                        if (activeUserImageUrl != null) {
+                            ImagePreview(
+                                imageUrl = activeUserImageUrl,
+                                contentDescription = "Open profile",
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.AccountCircle,
+                                contentDescription = "Open profile",
+                                modifier = Modifier.size(36.dp)
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Cream)
@@ -296,12 +299,17 @@ fun CollegeFridgeApp(
             composable(Screen.Scanner.route) { ScannerScreen() }
             composable(Screen.Browse.route) { BrowseScreen() }
             composable(Screen.Recipes.route) {
-                RecipeScreen(recipes,
+                val savedRecipes = InMemoryDb.getRecipes()
+                RecipeScreen(
+                    savedRecipes = savedRecipes,
                     onGenerateRecipe = {
                         navController.navigate(Screen.GenerateRecipe.route)
                     },
-                    onStartClick = { recipeName ->
-                        navController.navigate("${Screen.ComprehensiveRecipe.route}/$recipeName")
+                    onAddRecipe = {
+                        navController.navigate(Screen.ManualRecipe.route)
+                    },
+                    onStartClick = { recipeId ->
+                        navController.navigate("${Screen.ComprehensiveRecipe.route}/$recipeId")
                     }
                 )
             }
@@ -311,21 +319,57 @@ fun CollegeFridgeApp(
                     supplyOptions = supplyOptions,
                     generateRecipe = { request ->
                         geminiRepository.generateRecipeFromSelections(request)
+                    },
+                    onRecipeGenerated = { recipe ->
+                        generatedRecipe = recipe
+                        navController.navigate(Screen.GeneratedRecipe.route)
+                    }
+                )
+            }
+            composable(Screen.ManualRecipe.route) {
+                ManualRecipeScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onSaveRecipe = { manualRecipe ->
+                        val saved = InMemoryDb.storeRecipe(manualRecipe)
+                        navController.popBackStack()
+                        navController.navigate("${Screen.ComprehensiveRecipe.route}/${saved.id}")
                     }
                 )
             }
             composable(
-                route = "${Screen.ComprehensiveRecipe.route}/{recipeName}",
-                arguments = listOf(navArgument("recipeName") { type = NavType.StringType })
-            ) {
-                val recipeName = it.arguments?.getString("recipeName")
-                val recipe = recipes.find { it.name == recipeName }
+                route = "${Screen.ComprehensiveRecipe.route}/{recipeId}",
+                arguments = listOf(navArgument("recipeId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val recipeId = backStackEntry.arguments?.getString("recipeId")
+                val recipe = recipeId?.let { InMemoryDb.getRecipe(it) }
                 if (recipe != null) {
                     ComprehensiveRecipeScreen(
-                        recipe = recipe, 
+                        recipe = recipe,
                         pantryIngredients = listOf("Bread", "Jelly"),
                         onBackClick = { navController.popBackStack() }
                     )
+                } else {
+                    navController.popBackStack()
+                }
+            }
+            composable(Screen.GeneratedRecipe.route) {
+                val pendingRecipe = generatedRecipe
+                if (pendingRecipe != null) {
+                    ComprehensiveRecipeScreen(
+                        recipe = pendingRecipe,
+                        pantryIngredients = listOf("Bread", "Jelly"),
+                        onBackClick = {
+                            generatedRecipe = null
+                            navController.popBackStack()
+                        },
+                        onSaveRecipe = { recipeToSave ->
+                            InMemoryDb.storeRecipe(recipeToSave)
+                            generatedRecipe = null
+                            navController.popBackStack()
+                        }
+                    )
+                } else {
+                    navController.popBackStack()
                 }
             }
             composable(Screen.Pantry.route) { PantryScreen() }
@@ -333,9 +377,11 @@ fun CollegeFridgeApp(
             // Pass the corrected state and update function to ProfileScreen
             composable(Screen.Profile.route) {
                 ProfileScreen(
-                    user = userState,
+                    user = activeUser,
                     onUserChange = { updatedUser ->
-                        userState = updatedUser
+                        if (InMemoryDb.update(updatedUser)) {
+                            activeUser = updatedUser
+                        }
                     }
                 )
             }

@@ -1,12 +1,10 @@
 package com.example.cisc482_cooking_app.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -14,30 +12,29 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.cisc482_cooking_app.ui.components.BottomNavigationBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import com.example.cisc482_cooking_app.model.Recipe
 import com.example.cisc482_cooking_app.ui.components.RecipeCard
-import com.example.cisc482_cooking_app.ui.components.RecipeData
-import com.example.cisc482_cooking_app.ui.components.omeletteData
-import com.example.cisc482_cooking_app.ui.components.pBJData
-import com.example.cisc482_cooking_app.ui.components.tacoData
 import com.example.cisc482_cooking_app.ui.theme.AccentOrange
 import com.example.cisc482_cooking_app.ui.theme.EspressoBrown
-import kotlin.collections.emptyList
-import kotlin.collections.mutableListOf
 
 @Composable
-fun RecipeScreen(savedRecipes: List<RecipeData>, onGenerateRecipe: () -> Unit, onStartClick: (String) -> Unit) {
+fun RecipeScreen(
+    savedRecipes: List<Recipe>,
+    onGenerateRecipe: () -> Unit,
+    onAddRecipe: () -> Unit,
+    onStartClick: (String) -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -54,11 +51,25 @@ fun RecipeScreen(savedRecipes: List<RecipeData>, onGenerateRecipe: () -> Unit, o
 
         Text(text = "Want something new? Generate a new recipe!")
         Spacer(modifier = Modifier.height(8.dp))
-        Button(onClick = onGenerateRecipe, colors = ButtonDefaults.buttonColors(
-            containerColor = AccentOrange,
-            contentColor = Color.White
-        )) {
-            Text(text = "Generate Recipe")
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Button(
+                onClick = onGenerateRecipe,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = AccentOrange,
+                    contentColor = Color.White
+                )
+            ) {
+                Text(text = "Generate Recipe")
+            }
+            OutlinedIconButton(onClick = onAddRecipe) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add recipe manually"
+                )
+            }
         }
 
 
@@ -71,11 +82,4 @@ fun RecipeScreen(savedRecipes: List<RecipeData>, onGenerateRecipe: () -> Unit, o
 
 
     }
-
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewRecipeScreen(){
-    RecipeScreen(listOf(tacoData, omeletteData, pBJData), {}, {})
 }
