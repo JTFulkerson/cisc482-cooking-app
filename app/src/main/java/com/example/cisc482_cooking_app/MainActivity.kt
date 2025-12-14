@@ -45,7 +45,7 @@ import com.example.cisc482_cooking_app.ui.components.ImagePreview
 import com.example.cisc482_cooking_app.ui.screens.BrowseScreen
 import com.example.cisc482_cooking_app.ui.screens.ManualRecipeScreen
 import com.example.cisc482_cooking_app.ui.screens.PantryScreen
-import com.example.cisc482_cooking_app.ui.screens.PantryViewModel
+import com.example.cisc482_cooking_app.model.PantryViewModel
 import com.example.cisc482_cooking_app.ui.screens.ProfileScreen
 import com.example.cisc482_cooking_app.ui.screens.ScannerScreen
 import com.example.cisc482_cooking_app.data.ai.GeminiRepository
@@ -154,7 +154,7 @@ fun CollegeFridgeApp(
             startDestination = Screen.Profile.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(Screen.Scanner.route) { ScannerScreen() }
+            composable(Screen.Scanner.route) { ScannerScreen(pantryViewModel = pantryViewModel) }
             composable(Screen.Browse.route) {
                 BrowseScreen(
                     onRecipeClick = {

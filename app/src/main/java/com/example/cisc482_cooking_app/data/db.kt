@@ -7,6 +7,7 @@ import com.example.cisc482_cooking_app.model.User
 object InMemoryDb {
 	private val recipeStore = LinkedHashMap<String, Recipe>()
 	private val userStore = LinkedHashMap<String, User>()
+	private val pantryStore = mutableListOf<String>()
 	private val lock = Any()
 
 	fun storeRecipe(recipe: Recipe): Recipe = synchronized(lock) {
@@ -19,6 +20,36 @@ object InMemoryDb {
 	fun getRecipes(): List<Recipe> = synchronized(lock) { recipeStore.values.toList() }
 
 	fun getUser(id: String): User? = synchronized(lock) { userStore[id] }
+
+	fun getPantryItems(): List<String> = synchronized(lock) { pantryStore.toList() }
+
+	fun addPantryItem(item: String): Boolean = synchronized(lock) {
+		val cleaned = item.trim()
+		if (cleaned.isEmpty()) return false
+		if (pantryStore.contains(cleaned)) return false
+		pantryStore.add(0, cleaned)
+		true
+	}
+
+	fun addPantryItems(items: List<String>) = synchronized(lock) {
+		items.map { it.trim() }
+			.filter { it.isNotEmpty() }
+			.asReversed()
+			.forEach { cleaned ->
+				if (!pantryStore.contains(cleaned)) {
+					pantryStore.add(0, cleaned)
+				}
+			}
+	}
+
+	fun removePantryItem(item: String): Boolean = synchronized(lock) { pantryStore.remove(item) }
+
+	fun replacePantry(items: Collection<String>) = synchronized(lock) {
+		pantryStore.clear()
+		items.map { it.trim() }
+			.filter { it.isNotEmpty() }
+			.forEach { pantryStore.add(it) }
+	}
 
 	fun create(user: User): Boolean = synchronized(lock) {
 		if (userStore.containsKey(user.id)) return false
@@ -41,6 +72,7 @@ object InMemoryDb {
 	fun clearAll() = synchronized(lock) {
 		recipeStore.clear()
 		userStore.clear()
+		pantryStore.clear()
 	}
 
 	fun seedData() = synchronized(lock) {
@@ -105,6 +137,11 @@ object InMemoryDb {
 
 		recipeSeeds.forEach { recipe ->
 			recipeStore[recipe.id] = recipe
+		}
+
+		if (pantryStore.isEmpty()) {
+			val pantrySeeds = listOf("Milk", "Eggs", "Bread", "Cheese", "Chicken Breast")
+			pantryStore.addAll(pantrySeeds)
 		}
 
 		if (userStore.isEmpty()) {

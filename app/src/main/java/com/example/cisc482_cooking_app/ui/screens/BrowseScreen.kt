@@ -8,17 +8,25 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import com.example.cisc482_cooking_app.model.Difficulty
 import com.example.cisc482_cooking_app.model.Recipe
 import com.example.cisc482_cooking_app.ui.components.ImagePreview
+import com.example.cisc482_cooking_app.ui.theme.AccentOrange
+import com.example.cisc482_cooking_app.ui.theme.Cream
+import com.example.cisc482_cooking_app.ui.theme.DeepRed
+import com.example.cisc482_cooking_app.ui.theme.EspressoBrown
+import com.example.cisc482_cooking_app.ui.theme.LightGray
 
 // Hard-coded list of 4 shared recipes
 private val sharedRecipes = listOf(
@@ -77,15 +85,25 @@ fun BrowseScreen(
     onRecipeClick: (Recipe) -> Unit,
 ) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Cream)
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = "Shared Recipes",
             style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = EspressoBrown
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = "Curated picks from the community",
+            style = MaterialTheme.typography.bodyMedium,
+            color = DeepRed
+        )
+        Spacer(modifier = Modifier.height(20.dp))
 
         LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             items(sharedRecipes) { recipe ->
@@ -100,7 +118,13 @@ private fun GeneratedRecipeCard(recipe: Recipe, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White,
+            contentColor = EspressoBrown
+        ),
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
         Column {
             val imageUrl = recipe.imageUrls.firstOrNull()
@@ -117,7 +141,7 @@ private fun GeneratedRecipeCard(recipe: Recipe, onClick: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(16f / 9f)
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .background(LightGray)
                 ) // Placeholder
             }
 
@@ -125,13 +149,15 @@ private fun GeneratedRecipeCard(recipe: Recipe, onClick: () -> Unit) {
                 Text(
                     text = recipe.title,
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = EspressoBrown
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = recipe.description,
                     style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 3
+                    maxLines = 3,
+                    color = EspressoBrown.copy(alpha = 0.8f)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(
@@ -143,21 +169,21 @@ private fun GeneratedRecipeCard(recipe: Recipe, onClick: () -> Unit) {
                             imageVector = Icons.Default.Schedule,
                             contentDescription = "Total time",
                             modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            tint = AccentOrange
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = "${recipe.totalTimeMinutes} min",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = EspressoBrown.copy(alpha = 0.7f)
                         )
                     }
                     Text(
                         text = recipe.difficulty.name.let { it.first() + it.substring(1).lowercase() },
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = AccentOrange,
                         modifier = Modifier
-                            .background(MaterialTheme.colorScheme.secondaryContainer, shape = MaterialTheme.shapes.small)
+                            .background(AccentOrange.copy(alpha = 0.15f), shape = MaterialTheme.shapes.small)
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
