@@ -159,7 +159,7 @@ data class GeminiRecipeRequest(
         appendLine("1. The first non-whitespace character MUST be '{' and the last MUST be '}'.")
         appendLine("2. Do not escape quotes inside the JSON (e.g., write \"title\": \"...\", not \"\\\"title\\\"\").")
         appendLine("3. ingredients and steps must each contain at least 3 entries; tools may be empty but prefer at least 1 item.")
-        appendLine("4. imageUrls must contain at least one https URL. When unsure, supply exactly one photo URL using https://loremflickr.com/1200/800/{slug}, where {slug} is the recipe title or hero ingredient in lowercase with spaces replaced by hyphens (e.g., 'lemon-pasta'). This keeps the photo relevant yet always reachable.")
+        appendLine("4. imageUrls must contain at least one https URL. Use this EXACT format: 'https://image.pollinations.ai/prompt/{description}', where {description} is a short visual description of the dish with spaces replaced by '%20' (e.g., 'delicious%20lemon%20pasta%20on%20plate'). Do not use generic placeholders.")
         appendLine("5. totalTimeMinutes must be a positive integer; rating must be between 0 and 5; difficulty must be exactly EASY, MEDIUM, or HARD.")
         append("Return only the JSON object with no commentary.")
     }
