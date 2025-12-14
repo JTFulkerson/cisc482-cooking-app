@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -42,6 +43,7 @@ import com.example.cisc482_cooking_app.ui.components.ImagePreview
 import com.example.cisc482_cooking_app.ui.screens.BrowseScreen
 import com.example.cisc482_cooking_app.ui.screens.ManualRecipeScreen
 import com.example.cisc482_cooking_app.ui.screens.PantryScreen
+import com.example.cisc482_cooking_app.ui.screens.PantryViewModel
 import com.example.cisc482_cooking_app.ui.screens.ProfileScreen
 import com.example.cisc482_cooking_app.ui.screens.ScannerScreen
 import com.example.cisc482_cooking_app.data.ai.GeminiRepository
@@ -238,6 +240,7 @@ fun CollegeFridgeApp(
     supplyOptions: List<String>
 ) {
     val navController = rememberNavController()
+    val pantryViewModel: PantryViewModel = viewModel()
 
     var activeUser by remember {
         mutableStateOf(
@@ -297,7 +300,7 @@ fun CollegeFridgeApp(
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Scanner.route) { ScannerScreen() }
-            composable(Screen.Browse.route) { BrowseScreen() }
+            composable(Screen.Browse.route) { BrowseScreen(pantryViewModel = pantryViewModel) }
             composable(Screen.Recipes.route) {
                 val savedRecipes = InMemoryDb.getRecipes()
                 RecipeScreen(
@@ -372,7 +375,7 @@ fun CollegeFridgeApp(
                     navController.popBackStack()
                 }
             }
-            composable(Screen.Pantry.route) { PantryScreen() }
+            composable(Screen.Pantry.route) { PantryScreen(pantryViewModel = pantryViewModel) }
 
             // Pass the corrected state and update function to ProfileScreen
             composable(Screen.Profile.route) {
