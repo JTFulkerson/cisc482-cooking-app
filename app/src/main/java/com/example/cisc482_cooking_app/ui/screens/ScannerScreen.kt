@@ -301,7 +301,7 @@ private suspend fun getIngredientsFromGemini(image: Bitmap): Result<List<String>
     return withContext(Dispatchers.IO) {
         try {
             val generativeModel = GenerativeModel(
-                modelName = "gemini-pro-vision",
+                modelName = "gemini-2.5-flash",
                 apiKey = BuildConfig.GEMINI_API_KEY
             )
             val inputContent = content {
