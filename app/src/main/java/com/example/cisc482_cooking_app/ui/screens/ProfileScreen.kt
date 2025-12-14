@@ -9,14 +9,26 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material3.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -55,6 +67,14 @@ fun ProfileScreen(
         customAllergyInput = user.customAllergy ?: ""
     }
 
+    val textFieldColors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = AccentOrange,
+        unfocusedBorderColor = EspressoBrown.copy(alpha = 0.3f),
+        cursorColor = AccentOrange,
+        focusedLabelColor = AccentOrange,
+        unfocusedLabelColor = EspressoBrown.copy(alpha = 0.7f)
+    )
+
     // ---------- Validation based on UI state ----------
     val isNameInvalid = nameInput.isBlank()
     val isEmailInvalid = !(emailInput.contains("@") && emailInput.contains("."))
@@ -65,7 +85,9 @@ fun ProfileScreen(
     val isSaveButtonEnabled = !isNameInvalid && !isEmailInvalid && !isCustomAllergyInvalid
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Cream),
         horizontalAlignment = Alignment.CenterHorizontally,
         contentPadding = PaddingValues(bottom = 24.dp)
     ) {
@@ -77,7 +99,7 @@ fun ProfileScreen(
                 modifier = Modifier
                     .size(160.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFFADADD))
+                    .background(BlushPink)
             ) {
                 if (profileImageUrl != null) {
                     ImagePreview(
@@ -109,12 +131,13 @@ fun ProfileScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp),
                 isError = isEmailInvalid,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                colors = textFieldColors
             )
             if (isEmailInvalid) {
                 Text(
                     text = "Please enter a valid email",
-                    color = MaterialTheme.colorScheme.error,
+                    color = DeepRed,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -133,7 +156,8 @@ fun ProfileScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
+                    .padding(horizontal = 24.dp),
+                colors = textFieldColors
             )
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -145,12 +169,13 @@ fun ProfileScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp),
-                isError = isNameInvalid
+                isError = isNameInvalid,
+                colors = textFieldColors
             )
             if (isNameInvalid) {
                 Text(
                     text = "Name cannot be blank",
-                    color = MaterialTheme.colorScheme.error,
+                    color = DeepRed,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -167,6 +192,7 @@ fun ProfileScreen(
                 selectedAllergies = selectedAllergies,
                 customAllergyText = customAllergyInput,
                 isCustomAllergyInvalid = isCustomAllergyInvalid, // Pass down the invalid flag
+                textFieldColors = textFieldColors,
                 onAllergyChange = { allergy, isSelected ->
                     selectedAllergies = if (isSelected) {
                         (selectedAllergies + allergy).distinct()
@@ -204,7 +230,7 @@ fun ProfileScreen(
                 enabled = isSaveButtonEnabled,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = AccentOrange,
-                    contentColor = Color.White
+                    contentColor = Cream
                 ),
                 shape = RoundedCornerShape(8.dp)
             ) {
@@ -227,14 +253,14 @@ fun ProfileScreen(
                 Button(
                     onClick = { showDialog = false },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF3B82F6),
-                        contentColor = Color.White
+                        containerColor = AccentOrange,
+                        contentColor = Cream
                     )
                 ) {
                     Text("Ok")
                 }
             },
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = Cream
         )
     }
 }
@@ -246,6 +272,7 @@ fun AllergiesSection(
     selectedAllergies: List<Allergy>,
     customAllergyText: String,
     isCustomAllergyInvalid: Boolean, // Receive flag to show error state
+    textFieldColors: TextFieldColors,
     onAllergyChange: (Allergy, Boolean) -> Unit,
     onCustomAllergyTextChange: (String) -> Unit
 ) {
@@ -256,7 +283,7 @@ fun AllergiesSection(
             .fillMaxWidth()
             .padding(horizontal = 24.dp),
         shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
+        border = BorderStroke(1.dp, EspressoBrown.copy(alpha = 0.2f)),
         color = Cream
     ) {
         Column(
@@ -288,7 +315,8 @@ fun AllergiesSection(
                             onValueChange = onCustomAllergyTextChange,
                             label = { Text("Other") },
                             modifier = Modifier.weight(1f),
-                            isError = isCustomAllergyInvalid
+                            isError = isCustomAllergyInvalid,
+                            colors = textFieldColors
                         )
                     } else {
                         // Otherwise, display the second allergy checkbox as normal
@@ -320,7 +348,12 @@ fun AllergyCheckbox(
     ) {
         Checkbox(
             checked = isChecked,
-            onCheckedChange = onCheckedChange
+            onCheckedChange = onCheckedChange,
+            colors = CheckboxDefaults.colors(
+                checkedColor = AccentOrange,
+                checkmarkColor = Cream,
+                uncheckedColor = EspressoBrown.copy(alpha = 0.6f)
+            )
         )
         val allergyText = allergy.name
             .replace('_', ' ')

@@ -55,7 +55,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
@@ -69,9 +68,11 @@ import com.example.cisc482_cooking_app.BuildConfig
 import com.example.cisc482_cooking_app.model.PantryViewModel
 import com.example.cisc482_cooking_app.ui.theme.AccentOrange
 import com.example.cisc482_cooking_app.ui.theme.Cream
+import com.example.cisc482_cooking_app.ui.theme.DarkOverlay
 import com.example.cisc482_cooking_app.ui.theme.DeepRed
 import com.example.cisc482_cooking_app.ui.theme.EspressoBrown
 import com.example.cisc482_cooking_app.ui.theme.LightGray
+import com.example.cisc482_cooking_app.ui.theme.SoftWhite
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import kotlinx.coroutines.Dispatchers
@@ -117,7 +118,7 @@ fun ScannerScreen(pantryViewModel: PantryViewModel = viewModel()) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(DarkOverlay)
     ) {
         if (hasCamPermission) {
             AndroidView(
@@ -162,7 +163,7 @@ fun ScannerScreen(pantryViewModel: PantryViewModel = viewModel()) {
                 shape = CircleShape,
                 colors = IconButtonDefaults.filledIconButtonColors(
                     containerColor = AccentOrange,
-                    contentColor = Color.White
+                    contentColor = Cream
                 )
             ) {
                 Icon(
@@ -181,7 +182,7 @@ fun ScannerScreen(pantryViewModel: PantryViewModel = viewModel()) {
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .padding(top = 32.dp)
-                    .background(Color.Black.copy(alpha = 0.35f), RoundedCornerShape(50))
+                    .background(DarkOverlay.copy(alpha = 0.35f), RoundedCornerShape(50))
                     .padding(horizontal = 20.dp, vertical = 10.dp)
             )
         }
@@ -192,7 +193,7 @@ fun ScannerScreen(pantryViewModel: PantryViewModel = viewModel()) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.5f)),
+                        .background(DarkOverlay.copy(alpha = 0.5f)),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(color = AccentOrange)
@@ -294,7 +295,7 @@ private fun IngredientSelectionDialog(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(14.dp))
-                                    .background(Color.White)
+                                    .background(SoftWhite)
                                     .clickable {
                                         if (selectedIngredients.contains(ingredient)) {
                                             selectedIngredients.remove(ingredient)
@@ -310,7 +311,7 @@ private fun IngredientSelectionDialog(
                                     colors = CheckboxDefaults.colors(
                                         checkedColor = AccentOrange,
                                         uncheckedColor = EspressoBrown.copy(alpha = 0.6f),
-                                        checkmarkColor = Color.White
+                                        checkmarkColor = Cream
                                     )
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
@@ -343,7 +344,7 @@ private fun IngredientSelectionDialog(
                         enabled = selectedIngredients.isNotEmpty(),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = AccentOrange,
-                            contentColor = Color.White
+                            contentColor = Cream
                         )
                     ) {
                         Text("Add to Pantry")
@@ -406,7 +407,7 @@ private fun PermissionOverlay(
                 onClick = onRequestAgain,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = AccentOrange,
-                    contentColor = Color.White
+                    contentColor = Cream
                 )
             ) {
                 Text("Grant Permission")

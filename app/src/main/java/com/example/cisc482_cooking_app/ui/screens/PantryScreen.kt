@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Surface
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -27,6 +26,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,7 +38,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -47,6 +47,7 @@ import com.example.cisc482_cooking_app.ui.theme.AccentOrange
 import com.example.cisc482_cooking_app.ui.theme.Cream
 import com.example.cisc482_cooking_app.ui.theme.DeepRed
 import com.example.cisc482_cooking_app.ui.theme.EspressoBrown
+import com.example.cisc482_cooking_app.ui.theme.SoftWhite
 
 @Composable
 fun PantryScreen(
@@ -57,6 +58,13 @@ fun PantryScreen(
     var newItemText by rememberSaveable { mutableStateOf("") }
     val listState = rememberLazyListState()
     var lastSize by remember { mutableStateOf(pantryItems.size) }
+    val textFieldColors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = AccentOrange,
+        unfocusedBorderColor = EspressoBrown.copy(alpha = 0.3f),
+        cursorColor = AccentOrange,
+        focusedLabelColor = AccentOrange,
+        unfocusedLabelColor = EspressoBrown.copy(alpha = 0.7f)
+    )
 
     LaunchedEffect(pantryItems.size) {
         if (pantryItems.size > lastSize && pantryItems.isNotEmpty()) {
@@ -95,10 +103,14 @@ fun PantryScreen(
                 .fillMaxWidth()
                 .padding(bottom = 24.dp),
             shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = SoftWhite),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
-            Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -108,7 +120,8 @@ fun PantryScreen(
                         onValueChange = { newItemText = it },
                         label = { Text("Add new ingredient") },
                         modifier = Modifier.weight(1f),
-                        singleLine = true
+                        singleLine = true,
+                        colors = textFieldColors
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Button(
@@ -119,7 +132,7 @@ fun PantryScreen(
                         enabled = newItemText.isNotBlank(),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = AccentOrange,
-                            contentColor = Color.White
+                            contentColor = Cream
                         )
                     ) {
                         Text("Add")
@@ -131,6 +144,7 @@ fun PantryScreen(
                     Surface(
                         shape = RoundedCornerShape(16.dp),
                         tonalElevation = 2.dp,
+                        color = SoftWhite,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(vertical = 8.dp)) {
@@ -157,7 +171,7 @@ fun PantryScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.White, RoundedCornerShape(24.dp))
+                    .background(SoftWhite, RoundedCornerShape(24.dp))
                     .padding(32.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -179,7 +193,7 @@ fun PantryScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        colors = CardDefaults.cardColors(containerColor = SoftWhite),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
                         Row(

@@ -21,7 +21,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight // <-- Import FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,6 +33,7 @@ import com.example.cisc482_cooking_app.ui.theme.Cream
 import com.example.cisc482_cooking_app.ui.theme.EspressoBrown
 // Import your NavBackground color
 import com.example.cisc482_cooking_app.ui.theme.NavBackground
+import com.example.cisc482_cooking_app.ui.theme.Transparent
 
 @Composable
 fun BottomNavigationBar(navController: NavController) {
@@ -73,7 +73,7 @@ fun BottomNavigationBar(navController: NavController) {
             items.forEachIndexed { index, screen ->
                 val isSelected = currentRoute == screen.route ||
                     (screen == Screen.Recipes && currentRoute == Screen.GenerateRecipe.route)
-                val backgroundColor = if (isSelected) EspressoBrown else Color.Transparent
+                val backgroundColor = if (isSelected) EspressoBrown else Transparent
                 val contentColor = if (isSelected) Cream else EspressoBrown
 
                 Column(

@@ -41,13 +41,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.cisc482_cooking_app.ui.theme.AccentOrange
 import com.example.cisc482_cooking_app.model.Recipe
+import com.example.cisc482_cooking_app.ui.theme.AccentOrange
+import com.example.cisc482_cooking_app.ui.theme.Cream
 import com.example.cisc482_cooking_app.ui.theme.EspressoBrown
+import com.example.cisc482_cooking_app.ui.theme.GardenGreen
 import com.example.cisc482_cooking_app.ui.theme.LightGray
 
 @Composable
@@ -91,8 +92,8 @@ fun RecipeCard(recipe: Recipe, onStartClick: (String) -> Unit) {
                                 .padding(8.dp)
                                 .size(30.dp),
                             shape = CircleShape,
-                            border = BorderStroke(2.dp, Color.Green),
-                            color = Color.Green.copy(alpha = 0.3f)
+                            border = BorderStroke(2.dp, GardenGreen),
+                            color = GardenGreen.copy(alpha = 0.3f)
                         ) {
                             Box(
                                 contentAlignment = Alignment.Center,
@@ -148,7 +149,7 @@ fun RecipeCard(recipe: Recipe, onStartClick: (String) -> Unit) {
                                 Button(onClick = { onStartClick(recipe.id) },
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = AccentOrange,
-                                        contentColor = Color.White)) {
+                                        contentColor = Cream)) {
                                     Row{
                                         Text(text = "Start")
                                         Icon(

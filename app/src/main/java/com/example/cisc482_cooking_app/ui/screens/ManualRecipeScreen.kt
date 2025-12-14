@@ -36,7 +36,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.cisc482_cooking_app.model.Difficulty
@@ -44,6 +43,7 @@ import com.example.cisc482_cooking_app.model.Recipe
 import com.example.cisc482_cooking_app.ui.theme.AccentOrange
 import com.example.cisc482_cooking_app.ui.theme.Cream
 import com.example.cisc482_cooking_app.ui.theme.EspressoBrown
+import com.example.cisc482_cooking_app.ui.theme.Transparent
 import java.util.UUID
 
 @Composable
@@ -90,7 +90,7 @@ fun ManualRecipeScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBackClick) {
-                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back", tint = EspressoBrown)
             }
             Text(
                 text = "Add Recipe",
@@ -212,7 +212,7 @@ fun ManualRecipeScreen(
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = AccentOrange.copy(alpha = 0.2f),
                                 selectedLabelColor = EspressoBrown,
-                                containerColor = Color.Transparent,
+                                containerColor = Transparent,
                                 labelColor = EspressoBrown
                             )
                         )
@@ -255,7 +255,7 @@ fun ManualRecipeScreen(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = AccentOrange,
-                        contentColor = Color.White
+                        contentColor = Cream
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {

@@ -1,5 +1,6 @@
 package com.example.cisc482_cooking_app.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
@@ -16,8 +17,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -39,6 +42,11 @@ import com.example.cisc482_cooking_app.model.Recipe
 import com.example.cisc482_cooking_app.ui.components.LoadingPopup
 import com.example.cisc482_cooking_app.ui.theme.AccentOrange
 import com.example.cisc482_cooking_app.ui.theme.CISC482CookingAppTheme
+import com.example.cisc482_cooking_app.ui.theme.Cream
+import com.example.cisc482_cooking_app.ui.theme.DeepRed
+import com.example.cisc482_cooking_app.ui.theme.EspressoBrown
+import com.example.cisc482_cooking_app.ui.theme.LightGray
+import com.example.cisc482_cooking_app.ui.theme.SoftWhite
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
@@ -80,10 +88,18 @@ fun GenerateRecipeScreen(
     val columnSize = (allergies.size + 3 - 1) / 3
     val allergyColumns = allergies.chunked(columnSize)
     val otherSelected = Allergy.OTHER.name in selectedAllergyNames
+    val textFieldColors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = AccentOrange,
+        unfocusedBorderColor = EspressoBrown.copy(alpha = 0.3f),
+        cursorColor = AccentOrange,
+        focusedLabelColor = AccentOrange,
+        unfocusedLabelColor = EspressoBrown.copy(alpha = 0.7f)
+    )
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Cream)
             .verticalScroll(rememberScrollState())
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -116,7 +132,8 @@ fun GenerateRecipeScreen(
                         onValueChange = { ingredientQuery = it },
                         modifier = Modifier.weight(1f),
                         label = { Text(text = "Search ingredients") },
-                        singleLine = true
+                        singleLine = true,
+                        colors = textFieldColors
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Button(
@@ -130,7 +147,7 @@ fun GenerateRecipeScreen(
                         enabled = ingredientQuery.isNotBlank(),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = AccentOrange,
-                            contentColor = androidx.compose.ui.graphics.Color.White
+                            contentColor = Cream
                         )
                     ) {
                         Text("Add")
@@ -142,14 +159,15 @@ fun GenerateRecipeScreen(
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         shape = MaterialTheme.shapes.medium,
-                        tonalElevation = 4.dp
+                        tonalElevation = 4.dp,
+                        color = SoftWhite
                     ) {
                         Column(modifier = Modifier.padding(vertical = 8.dp)) {
                             suggestions.forEach { ingredient ->
                                 Text(
                                     text = ingredient,
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface,
+                                    color = EspressoBrown,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
@@ -173,7 +191,7 @@ fun GenerateRecipeScreen(
                 Text(
                     text = "No ingredients available",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = DeepRed
                 )
             }
 
@@ -182,7 +200,7 @@ fun GenerateRecipeScreen(
                 Text(
                     text = "No matches found",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = DeepRed
                 )
             }
 
@@ -212,13 +230,14 @@ fun GenerateRecipeScreen(
                         Text(
                             text = ingredient,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            color = EspressoBrown,
                             modifier = Modifier.weight(1f)
                         )
                         TextButton(
                             onClick = {
                                 selectedIngredients = selectedIngredients.filterNot { it == ingredient }
-                            }
+                            },
+                            colors = ButtonDefaults.textButtonColors(contentColor = DeepRed)
                         ) {
                             Text(text = "Remove")
                         }
@@ -244,7 +263,8 @@ fun GenerateRecipeScreen(
                     onValueChange = { supplyQuery = it },
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text(text = "Search supplies") },
-                    singleLine = true
+                    singleLine = true,
+                    colors = textFieldColors
                 )
 
                 if (showSupplySuggestions) {
@@ -252,14 +272,15 @@ fun GenerateRecipeScreen(
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         shape = MaterialTheme.shapes.medium,
-                        tonalElevation = 4.dp
+                        tonalElevation = 4.dp,
+                        color = SoftWhite
                     ) {
                         Column(modifier = Modifier.padding(vertical = 8.dp)) {
                             supplySuggestions.forEach { supply ->
                                 Text(
                                     text = supply,
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface,
+                                    color = EspressoBrown,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
@@ -283,7 +304,7 @@ fun GenerateRecipeScreen(
                 Text(
                     text = "No supplies available",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = DeepRed
                 )
             }
 
@@ -292,7 +313,7 @@ fun GenerateRecipeScreen(
                 Text(
                     text = "No matches found",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = DeepRed
                 )
             }
 
@@ -322,13 +343,14 @@ fun GenerateRecipeScreen(
                         Text(
                             text = supply,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            color = EspressoBrown,
                             modifier = Modifier.weight(1f)
                         )
                         TextButton(
                             onClick = {
                                 selectedSupplies = selectedSupplies.filterNot { it == supply }
-                            }
+                            },
+                            colors = ButtonDefaults.textButtonColors(contentColor = DeepRed)
                         ) {
                             Text(text = "Remove")
                         }
@@ -369,7 +391,8 @@ fun GenerateRecipeScreen(
                 value = customAllergyText,
                 onValueChange = { customAllergyText = it },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text(text = "Describe other allergy") }
+                label = { Text(text = "Describe other allergy") },
+                colors = textFieldColors
             )
         }
 
@@ -379,7 +402,8 @@ fun GenerateRecipeScreen(
             value = additionalRequest,
             onValueChange = { additionalRequest = it },
             modifier = Modifier.fillMaxWidth(),
-            label = { Text(text = "Any special requests?") }
+            label = { Text(text = "Any special requests?") },
+            colors = textFieldColors
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -426,7 +450,7 @@ fun GenerateRecipeScreen(
             enabled = generateRecipe != null && !isGenerating,
             colors = ButtonDefaults.buttonColors(
                 containerColor = AccentOrange,
-                contentColor = androidx.compose.ui.graphics.Color.White
+                contentColor = Cream
             )
         ) {
             Text(text = if (isGenerating) "Creating..." else "Create")
@@ -439,7 +463,7 @@ fun GenerateRecipeScreen(
             generationError != null -> {
                 Text(
                     text = generationError ?: "",
-                    color = MaterialTheme.colorScheme.error,
+                    color = DeepRed,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -447,13 +471,14 @@ fun GenerateRecipeScreen(
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     tonalElevation = 2.dp,
-                    shape = MaterialTheme.shapes.medium
+                    shape = MaterialTheme.shapes.medium,
+                    color = SoftWhite
                 ) {
                     Text(
                         text = generatedRecipePreview.orEmpty(),
                         modifier = Modifier.padding(16.dp),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = EspressoBrown
                     )
                 }
             }
@@ -478,11 +503,17 @@ private fun AllergyColumn(
             ) {
                 Checkbox(
                     checked = allergy.name in selectedAllergyNames,
-                    onCheckedChange = { onToggle(allergy.name) }
+                    onCheckedChange = { onToggle(allergy.name) },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = AccentOrange,
+                        checkmarkColor = Cream,
+                        uncheckedColor = EspressoBrown.copy(alpha = 0.6f)
+                    )
                 )
                 Text(
                     text = allergy.displayName,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = EspressoBrown
                 )
             }
         }
@@ -552,7 +583,7 @@ private fun JSONArray.toStringList(): List<String> = buildList(length()) {
 @Composable
 fun GenerateRecipeScreenPreview() {
     CISC482CookingAppTheme {
-        Surface {
+        Surface(color = Cream) {
             GenerateRecipeScreen(
                 ingredientOptions = listOf(
                     "Chicken",

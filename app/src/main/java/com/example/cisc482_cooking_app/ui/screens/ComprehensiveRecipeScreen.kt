@@ -31,7 +31,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -43,6 +42,9 @@ import com.example.cisc482_cooking_app.model.Recipe
 import com.example.cisc482_cooking_app.ui.components.ImagePreview
 import com.example.cisc482_cooking_app.ui.theme.AccentOrange
 import com.example.cisc482_cooking_app.ui.theme.Cream
+import com.example.cisc482_cooking_app.ui.theme.EspressoBrown
+import com.example.cisc482_cooking_app.ui.theme.GardenGreen
+import com.example.cisc482_cooking_app.ui.theme.LightGray
 
 
 @Composable
@@ -65,7 +67,7 @@ fun ComprehensiveRecipeScreen(
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             IconButton(onClick = onBackClick, modifier = Modifier.align(Alignment.CenterStart)) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = EspressoBrown)
             }
         }
         // Title and Image
@@ -89,7 +91,7 @@ fun ComprehensiveRecipeScreen(
                         .fillMaxWidth()
                         .height(200.dp)
                         .clip(shape = RoundedCornerShape(8.dp)),
-                    color = Color.LightGray
+                    color = LightGray
                 ) {}
             }
             Spacer(modifier = Modifier.height(8.dp))
@@ -97,7 +99,8 @@ fun ComprehensiveRecipeScreen(
                 text = recipe.title,
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = EspressoBrown
             )
         }
 
@@ -113,9 +116,10 @@ fun ComprehensiveRecipeScreen(
                 Icon(
                     imageVector = Icons.Default.AccessTime,
                     contentDescription = "Time to cook",
-                    modifier = Modifier.size(48.dp)
+                    modifier = Modifier.size(48.dp),
+                    tint = AccentOrange
                 )
-                Text(text = " ${recipe.totalTimeMinutes} min", fontSize = 18.sp)
+                Text(text = " ${recipe.totalTimeMinutes} min", fontSize = 18.sp, color = EspressoBrown)
             }
             Row(verticalAlignment = Alignment.CenterVertically){
                 Surface(
@@ -123,24 +127,24 @@ fun ComprehensiveRecipeScreen(
                         .padding(8.dp)
                         .size(50.dp),
                     shape = CircleShape,
-                    border = BorderStroke(2.dp, Color.Green),
-                    color = Color.Green.copy(alpha = 0.3f)
+                    border = BorderStroke(2.dp, GardenGreen),
+                    color = GardenGreen.copy(alpha = 0.25f)
                 ) {
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        Text(text = "$ingredientsOwned/${recipe.ingredients.size}", fontSize = 18.sp)
+                        Text(text = "$ingredientsOwned/${recipe.ingredients.size}", fontSize = 18.sp, color = EspressoBrown)
                     }
 
                 }
-                Text(text = "Ingredients", fontSize = 18.sp)
+                Text(text = "Ingredients", fontSize = 18.sp, color = EspressoBrown)
             }
 
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-        HorizontalDivider()
+        HorizontalDivider(color = LightGray, thickness = 2.dp)
         Spacer(modifier = Modifier.height(16.dp))
 
         // Ingredients and Tools
@@ -151,24 +155,24 @@ fun ComprehensiveRecipeScreen(
             horizontalArrangement = Arrangement.SpaceAround
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = "Ingredients", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                Text(text = "Ingredients", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = EspressoBrown)
                 Spacer(modifier = Modifier.height(8.dp))
                 recipe.ingredients.forEach { ingredient ->
-                    Text(text = "- $ingredient")
+                    Text(text = "- $ingredient", color = EspressoBrown)
                 }
             }
-            VerticalDivider()
+            VerticalDivider(color = LightGray, thickness = 2.dp)
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = "Tools", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                Text(text = "Tools", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = EspressoBrown)
                 Spacer(modifier = Modifier.height(8.dp))
                 recipe.tools.forEach { tool ->
-                    Text(text = "- $tool")
+                    Text(text = "- $tool", color = EspressoBrown)
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-        HorizontalDivider()
+        HorizontalDivider(color = LightGray, thickness = 2.dp)
         Spacer(modifier = Modifier.height(16.dp))
 
 
@@ -176,10 +180,10 @@ fun ComprehensiveRecipeScreen(
         Column(modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)) {
-            Text(text = "Steps", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Text(text = "Steps", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = EspressoBrown)
             Spacer(modifier = Modifier.height(8.dp))
             recipe.steps.forEachIndexed { index, step ->
-                Text(text = "${index + 1}. $step")
+                Text(text = "${index + 1}. $step", color = EspressoBrown)
             }
 
 			if (onSaveRecipe != null) {
@@ -188,7 +192,7 @@ fun ComprehensiveRecipeScreen(
                     onClick = { onSaveRecipe(recipe) },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = AccentOrange,
-                        contentColor = Color.White
+                        contentColor = Cream
                     )
                 ) {
 					Text(text = "Save Recipe")
