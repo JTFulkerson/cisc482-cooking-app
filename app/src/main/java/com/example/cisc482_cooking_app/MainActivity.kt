@@ -40,6 +40,7 @@ import com.example.cisc482_cooking_app.navigation.Screen
 import com.example.cisc482_cooking_app.ui.components.BottomNavigationBar
 import com.example.cisc482_cooking_app.ui.components.ImagePreview
 import com.example.cisc482_cooking_app.ui.screens.BrowseScreen
+import com.example.cisc482_cooking_app.ui.screens.ManualRecipeScreen
 import com.example.cisc482_cooking_app.ui.screens.PantryScreen
 import com.example.cisc482_cooking_app.ui.screens.ProfileScreen
 import com.example.cisc482_cooking_app.ui.screens.ScannerScreen
@@ -304,6 +305,9 @@ fun CollegeFridgeApp(
                     onGenerateRecipe = {
                         navController.navigate(Screen.GenerateRecipe.route)
                     },
+                    onAddRecipe = {
+                        navController.navigate(Screen.ManualRecipe.route)
+                    },
                     onStartClick = { recipeId ->
                         navController.navigate("${Screen.ComprehensiveRecipe.route}/$recipeId")
                     }
@@ -319,6 +323,16 @@ fun CollegeFridgeApp(
                     onRecipeGenerated = { recipe ->
                         generatedRecipe = recipe
                         navController.navigate(Screen.GeneratedRecipe.route)
+                    }
+                )
+            }
+            composable(Screen.ManualRecipe.route) {
+                ManualRecipeScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onSaveRecipe = { manualRecipe ->
+                        val saved = InMemoryDb.storeRecipe(manualRecipe)
+                        navController.popBackStack()
+                        navController.navigate("${Screen.ComprehensiveRecipe.route}/${saved.id}")
                     }
                 )
             }
