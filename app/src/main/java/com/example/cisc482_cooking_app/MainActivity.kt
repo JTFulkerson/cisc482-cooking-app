@@ -179,9 +179,12 @@ fun CollegeFridgeApp(
                 )
             }
             composable(Screen.GenerateRecipe.route) {
+                val pantryIngredients = pantryViewModel.pantryItems
+                val ingredientChoices = ingredientOptions
                 GenerateRecipeScreen(
-                    ingredientOptions = ingredientOptions,
+                    ingredientOptions = ingredientChoices,
                     supplyOptions = supplyOptions,
+                    defaultSelectedIngredients = pantryIngredients.toList(),
                     generateRecipe = { request ->
                         geminiRepository.generateRecipeFromSelections(request)
                     },
@@ -237,7 +240,12 @@ fun CollegeFridgeApp(
                     navController.popBackStack()
                 }
             }
-            composable(Screen.Pantry.route) { PantryScreen(pantryViewModel = pantryViewModel) }
+            composable(Screen.Pantry.route) {
+                PantryScreen(
+                    pantryViewModel = pantryViewModel,
+                    ingredientOptions = ingredientOptions
+                )
+            }
 
             composable(Screen.Profile.route) {
                 if (currentUser != null) {

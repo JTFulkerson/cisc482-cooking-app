@@ -1,6 +1,7 @@
 package com.example.cisc482_cooking_app.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Surface
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -47,7 +49,10 @@ import com.example.cisc482_cooking_app.ui.theme.DeepRed
 import com.example.cisc482_cooking_app.ui.theme.EspressoBrown
 
 @Composable
-fun PantryScreen(pantryViewModel: PantryViewModel = viewModel()) {
+fun PantryScreen(
+    pantryViewModel: PantryViewModel = viewModel(),
+    ingredientOptions: List<String> = emptyList()
+) {
     val pantryItems = pantryViewModel.pantryItems
     var newItemText by rememberSaveable { mutableStateOf("") }
     val listState = rememberLazyListState()
@@ -81,6 +86,10 @@ fun PantryScreen(pantryViewModel: PantryViewModel = viewModel()) {
         Spacer(modifier = Modifier.height(20.dp))
 
         // Input for adding new items
+        val filteredSuggestions = ingredientOptions.filter { option ->
+            newItemText.isNotBlank() && option.contains(newItemText, ignoreCase = true)
+        }.take(5)
+
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -89,32 +98,56 @@ fun PantryScreen(pantryViewModel: PantryViewModel = viewModel()) {
             colors = CardDefaults.cardColors(containerColor = Color.White),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                OutlinedTextField(
-                    value = newItemText,
-                    onValueChange = { newItemText = it },
-                    label = { Text("Add new ingredient") },
-                    modifier = Modifier.weight(1f),
-                    singleLine = true
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Button(
-                    onClick = {
-                        pantryViewModel.addPantryItem(newItemText.trim())
-                        newItemText = "" // Clear the text field
-                    },
-                    enabled = newItemText.isNotBlank(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = AccentOrange,
-                        contentColor = Color.White
-                    )
+            Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Add")
+                    OutlinedTextField(
+                        value = newItemText,
+                        onValueChange = { newItemText = it },
+                        label = { Text("Add new ingredient") },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Button(
+                        onClick = {
+                            pantryViewModel.addPantryItem(newItemText.trim())
+                            newItemText = ""
+                        },
+                        enabled = newItemText.isNotBlank(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = AccentOrange,
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Text("Add")
+                    }
+                }
+
+                if (filteredSuggestions.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        tonalElevation = 2.dp,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                            filteredSuggestions.forEach { suggestion ->
+                                Text(
+                                    text = suggestion,
+                                    color = EspressoBrown,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            newItemText = suggestion
+                                        }
+                                        .padding(horizontal = 16.dp, vertical = 6.dp)
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

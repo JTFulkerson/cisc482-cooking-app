@@ -129,10 +129,10 @@ data class GeminiRecipeRequest(
     fun asPrompt(): String = buildString {
         appendLine("You are an AI chef. Create a detailed recipe.")
         if (ingredients.isNotEmpty()) {
-            appendLine("Available ingredients: ${ingredients.joinToString()}")
+            appendLine("Available ingredients (use any subset, but never add others): ${ingredients.joinToString()}")
         }
         if (supplies.isNotEmpty()) {
-            appendLine("Available supplies/equipment: ${supplies.joinToString()}")
+            appendLine("Available supplies/equipment (use any subset, but do not introduce new tools): ${supplies.joinToString()}")
         }
         if (allergies.isNotEmpty()) {
             appendLine("Allergy considerations: ${allergies.joinToString()}")
@@ -161,6 +161,7 @@ data class GeminiRecipeRequest(
         appendLine("3. ingredients and steps must each contain at least 3 entries; tools may be empty but prefer at least 1 item.")
         appendLine("4. imageUrls must contain at least one https URL. Use this EXACT format: 'https://image.pollinations.ai/prompt/{description}', where {description} is a short visual description of the dish with spaces replaced by '%20' (e.g., 'delicious%20lemon%20pasta%20on%20plate'). Do not use generic placeholders.")
         appendLine("5. totalTimeMinutes must be a positive integer; rating must be between 0 and 5; difficulty must be exactly EASY, MEDIUM, or HARD.")
+        appendLine("6. You may omit any provided ingredient or tool if it does not make sense, but you may NOT reference anything that was not explicitly listed above.")
         append("Return only the JSON object with no commentary.")
     }
 }

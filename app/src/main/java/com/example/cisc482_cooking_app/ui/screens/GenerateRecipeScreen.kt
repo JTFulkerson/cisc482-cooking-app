@@ -49,7 +49,8 @@ fun GenerateRecipeScreen(
     ingredientOptions: List<String> = emptyList(),
     supplyOptions: List<String> = emptyList(),
     generateRecipe: (suspend (GeminiRecipeRequest) -> GeminiResult<String>)? = null,
-    onRecipeGenerated: ((Recipe) -> Unit)? = null
+    onRecipeGenerated: ((Recipe) -> Unit)? = null,
+    defaultSelectedIngredients: List<String> = emptyList()
 ) {
     var ingredientQuery by rememberSaveable { mutableStateOf("") }
     val filteredIngredients = ingredientOptions.filter { option ->
@@ -64,7 +65,9 @@ fun GenerateRecipeScreen(
     }
     val supplySuggestions = filteredSupplies.take(suggestionLimit)
     val showSupplySuggestions = supplyQuery.isNotBlank() && supplySuggestions.isNotEmpty()
-    var selectedIngredients by rememberSaveable { mutableStateOf(emptyList<String>()) }
+    var selectedIngredients by rememberSaveable(defaultSelectedIngredients) {
+        mutableStateOf(defaultSelectedIngredients.distinct())
+    }
     var selectedSupplies by rememberSaveable { mutableStateOf(emptyList<String>()) }
     var selectedAllergyNames by rememberSaveable { mutableStateOf(emptyList<String>()) }
     var customAllergyText by rememberSaveable { mutableStateOf("") }
@@ -104,13 +107,35 @@ fun GenerateRecipeScreen(
 
         Box(modifier = Modifier.fillMaxWidth()) {
             Column {
-                OutlinedTextField(
-                    value = ingredientQuery,
-                    onValueChange = { ingredientQuery = it },
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text(text = "Search ingredients") },
-                    singleLine = true
-                )
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedTextField(
+                        value = ingredientQuery,
+                        onValueChange = { ingredientQuery = it },
+                        modifier = Modifier.weight(1f),
+                        label = { Text(text = "Search ingredients") },
+                        singleLine = true
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Button(
+                        onClick = {
+                            val trimmed = ingredientQuery.trim()
+                            if (trimmed.isNotEmpty() && trimmed !in selectedIngredients) {
+                                selectedIngredients = selectedIngredients + trimmed
+                            }
+                            ingredientQuery = ""
+                        },
+                        enabled = ingredientQuery.isNotBlank(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = AccentOrange,
+                            contentColor = androidx.compose.ui.graphics.Color.White
+                        )
+                    ) {
+                        Text("Add")
+                    }
+                }
 
                 if (showSuggestions) {
                     Spacer(modifier = Modifier.height(8.dp))
@@ -472,7 +497,12 @@ private val Allergy.displayName: String
         .joinToString(" ") { word -> word.replaceFirstChar { it.uppercase() } }
 
 private fun parseRecipeJson(raw: String): Recipe? = runCatching {
-    val json = JSONObject(raw)
+    val sanitized = raw
+        .trimCodeFences()
+        ?.extractJsonObject()
+        ?.trim()
+        ?: raw
+    val json = JSONObject(sanitized)
     val id = json.optString("id").ifBlank { UUID.randomUUID().toString() }
     val title = json.getString("title")
     val description = json.getString("description")
@@ -497,6 +527,20 @@ private fun parseRecipeJson(raw: String): Recipe? = runCatching {
         difficulty = difficulty
     )
 }.getOrNull()
+
+private fun String.trimCodeFences(): String? {
+    val trimmed = trim()
+    return if (trimmed.startsWith("```")) {
+        trimmed.removePrefix("```").removeSuffix("```").trim()
+    } else trimmed
+}
+
+private fun String.extractJsonObject(): String? {
+    val start = indexOf('{')
+    val end = lastIndexOf('}')
+    if (start == -1 || end == -1 || end <= start) return null
+    return substring(start, end + 1)
+}
 
 private fun JSONArray.toStringList(): List<String> = buildList(length()) {
     for (index in 0 until length()) {
@@ -524,6 +568,7 @@ fun GenerateRecipeScreenPreview() {
                     "Saucepan",
                     "Cutting Board"
                 ),
+                defaultSelectedIngredients = listOf("Chicken", "Basil"),
                 generateRecipe = {
                     GeminiResult.Success(
                         "{" +
