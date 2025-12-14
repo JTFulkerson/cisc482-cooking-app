@@ -300,7 +300,14 @@ fun CollegeFridgeApp(
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Scanner.route) { ScannerScreen() }
-            composable(Screen.Browse.route) { BrowseScreen(pantryViewModel = pantryViewModel) }
+            composable(Screen.Browse.route) {
+                BrowseScreen(
+                    onRecipeClick = {
+                        generatedRecipe = it
+                        navController.navigate(Screen.GeneratedRecipe.route)
+                    }
+                )
+            }
             composable(Screen.Recipes.route) {
                 val savedRecipes = InMemoryDb.getRecipes()
                 RecipeScreen(
@@ -348,7 +355,7 @@ fun CollegeFridgeApp(
                 if (recipe != null) {
                     ComprehensiveRecipeScreen(
                         recipe = recipe,
-                        pantryIngredients = listOf("Bread", "Jelly"),
+                        pantryIngredients = pantryViewModel.pantryItems, // Now uses the ViewModel
                         onBackClick = { navController.popBackStack() }
                     )
                 } else {
@@ -360,7 +367,7 @@ fun CollegeFridgeApp(
                 if (pendingRecipe != null) {
                     ComprehensiveRecipeScreen(
                         recipe = pendingRecipe,
-                        pantryIngredients = listOf("Bread", "Jelly"),
+                        pantryIngredients = pantryViewModel.pantryItems, // Now uses the ViewModel
                         onBackClick = {
                             generatedRecipe = null
                             navController.popBackStack()
