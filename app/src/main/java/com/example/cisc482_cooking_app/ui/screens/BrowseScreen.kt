@@ -5,103 +5,91 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.cisc482_cooking_app.BuildConfig
 import com.example.cisc482_cooking_app.model.Difficulty
 import com.example.cisc482_cooking_app.model.Recipe
 import com.example.cisc482_cooking_app.ui.components.ImagePreview
-import com.google.ai.client.generativeai.GenerativeModel
-import com.google.ai.client.generativeai.type.content
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.json.JSONArray
-import org.json.JSONObject
-import java.util.UUID
 
-private sealed interface BrowseState {
-    object Loading : BrowseState
-    data class Success(val recipes: List<Recipe>) : BrowseState
-    data class Error(val message: String) : BrowseState
-    object EmptyPantry : BrowseState
-}
+// Hard-coded list of 4 shared recipes
+private val sharedRecipes = listOf(
+    Recipe(
+        id = "shared_1",
+        title = "Grilled Salmon with Asparagus",
+        description = "A healthy and delicious weeknight dinner. The salmon is cooked to perfection and served with crisp-tender asparagus.",
+        ingredients = listOf("1 lb salmon fillets", "1 bunch asparagus", "2 tbsp olive oil", "1 lemon", "Salt and pepper"),
+        tools = listOf("Grill", "Tongs"),
+        steps = listOf("Preheat grill to medium-high.", "Toss asparagus with 1 tbsp olive oil, salt, and pepper.", "Grill asparagus for 5-7 minutes, turning occasionally.", "Season salmon with salt, pepper, and remaining olive oil. Grill for 4-6 minutes per side.", "Serve salmon with a squeeze of lemon and grilled asparagus."),
+        imageUrls = listOf("https://images.pexels.com/photos/3763847/pexels-photo-3763847.jpeg"),
+        totalTimeMinutes = 20,
+        rating = 4.8f,
+        difficulty = Difficulty.EASY
+    ),
+    Recipe(
+        id = "shared_3",
+        title = "Mushroom Risotto",
+        description = "A creamy and comforting classic Italian dish. Perfect for a cozy night in.",
+        ingredients = listOf("1 tbsp olive oil", "1/2 onion, chopped", "8 oz mushrooms, sliced", "1 1/2 cups Arborio rice", "1/2 cup dry white wine", "4 cups chicken or vegetable broth, warmed", "1/2 cup grated Parmesan cheese"),
+        tools = listOf("Large saucepan", "Wooden spoon"),
+        steps = listOf("Heat olive oil in a saucepan. Add onion and cook until soft. Add mushrooms and cook until browned.", "Stir in Arborio rice and cook for 1 minute.", "Pour in wine and cook until absorbed. Add broth, one ladleful at a time, stirring until each is absorbed before adding the next.", "Once rice is tender and creamy, stir in Parmesan cheese. Season with salt and pepper."),
+        imageUrls = listOf("https://images.pexels.com/photos/5409013/pexels-photo-5409013.jpeg"),
+        totalTimeMinutes = 45,
+        rating = 4.9f,
+        difficulty = Difficulty.HARD
+    ),
+    Recipe(
+        id = "shared_4",
+        title = "Caprese Salad",
+        description = "A simple and elegant salad that highlights the fresh flavors of summer.",
+        ingredients = listOf("2 large ripe tomatoes, sliced", "8 oz fresh mozzarella cheese, sliced", "Fresh basil leaves", "Balsamic glaze", "Extra virgin olive oil", "Salt and pepper"),
+        tools = listOf("Knife", "Platter"),
+        steps = listOf("Arrange tomato and mozzarella slices on a platter, alternating them.", "Tuck fresh basil leaves in between the slices.", "Drizzle with balsamic glaze and olive oil.", "Season with salt and pepper to taste. Serve immediately."),
+        imageUrls = listOf("https://images.pexels.com/photos/1211887/pexels-photo-1211887.jpeg"),
+        totalTimeMinutes = 10,
+        rating = 4.6f,
+        difficulty = Difficulty.EASY
+    ),
+    Recipe(
+        id = "shared_5",
+        title = "Chocolate Avocado Mousse",
+        description = "A surprisingly healthy and decadent dessert. You won't even taste the avocado!",
+        ingredients = listOf("2 ripe avocados", "1/2 cup unsweetened cocoa powder", "1/2 cup maple syrup", "1/4 cup almond milk", "1 tsp vanilla extract", "Pinch of salt"),
+        tools = listOf("Food processor or blender"),
+        steps = listOf("Combine all ingredients in a food processor or high-speed blender.", "Blend until completely smooth.", "Chill in the refrigerator for at least 30 minutes before serving."),
+        imageUrls = listOf("https://images.pexels.com/photos/6061396/pexels-photo-6061396.jpeg"),
+        totalTimeMinutes = 10,
+        rating = 4.5f,
+        difficulty = Difficulty.EASY
+    )
+)
 
 @Composable
 fun BrowseScreen(
     onRecipeClick: (Recipe) -> Unit,
-    pantryViewModel: PantryViewModel = viewModel()
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    var state by remember { mutableStateOf<BrowseState>(BrowseState.Loading) }
-    val pantryIngredients = pantryViewModel.pantryItems
-
-    LaunchedEffect(key1 = pantryIngredients.toList()) {
-        state = if (pantryIngredients.isNotEmpty()) {
-            BrowseState.Loading
-        } else {
-            BrowseState.EmptyPantry
-        }
-
-        if (pantryIngredients.isNotEmpty()) {
-            coroutineScope.launch {
-                val result = generateRecipesFromIngredients(pantryIngredients)
-                state = if (result.isSuccess) {
-                    BrowseState.Success(result.getOrDefault(emptyList()))
-                } else {
-                    BrowseState.Error(result.exceptionOrNull()?.message ?: "An unknown error occurred.")
-                }
-            }
-        }
-    }
-
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Recipe Suggestions",
+            text = "Shared Recipes",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text("Based on ${pantryIngredients.size} ingredients in your pantry.")
+        Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        when (val currentState = state) {
-            is BrowseState.Loading -> CircularProgressIndicator()
-            is BrowseState.Success -> {
-                if (currentState.recipes.isEmpty()) {
-                    Text("Couldn\'t generate any recipes. Try adding more ingredients to your pantry!")
-                } else {
-                    LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        items(currentState.recipes) { recipe ->
-                            GeneratedRecipeCard(recipe, onClick = { onRecipeClick(recipe) })
-                        }
-                    }
-                }
-            }
-            is BrowseState.Error -> {
-                Text(
-                    text = "Error: ${currentState.message}",
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
-            is BrowseState.EmptyPantry -> {
-                Text(
-                    text = "Add ingredients to your pantry via the Pantry tab to get recipe suggestions.",
-                    textAlign = TextAlign.Center
-                )
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            items(sharedRecipes) { recipe ->
+                GeneratedRecipeCard(recipe, onClick = { onRecipeClick(recipe) })
             }
         }
     }
@@ -114,93 +102,66 @@ private fun GeneratedRecipeCard(recipe: Recipe, onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable(onClick = onClick)
     ) {
-        Row(modifier = Modifier.padding(16.dp)) {
+        Column {
             val imageUrl = recipe.imageUrls.firstOrNull()
             if (imageUrl != null) {
                 ImagePreview(
                     imageUrl = imageUrl,
                     contentDescription = recipe.title,
-                    modifier = Modifier.size(100.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16f / 9f)
                 )
             } else {
-                Box(modifier = Modifier.size(100.dp).background(MaterialTheme.colorScheme.surfaceVariant)) // Placeholder
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16f / 9f)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                ) // Placeholder
             }
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = recipe.title, style = MaterialTheme.typography.titleLarge)
+
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = recipe.title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = recipe.description, maxLines = 3)
+                Text(
+                    text = recipe.description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 3
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Schedule,
+                            contentDescription = "Total time",
+                            modifier = Modifier.size(18.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "${recipe.totalTimeMinutes} min",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Text(
+                        text = recipe.difficulty.name.let { it.first() + it.substring(1).lowercase() },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.secondaryContainer, shape = MaterialTheme.shapes.small)
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
             }
         }
-    }
-}
-
-private suspend fun generateRecipesFromIngredients(ingredients: List<String>): Result<List<Recipe>> {
-    return withContext(Dispatchers.IO) {
-        try {
-            val generativeModel = GenerativeModel(
-                modelName = "gemini-2.5-flash",
-                apiKey = BuildConfig.GEMINI_API_KEY
-            )
-            val prompt = """
-            Based on the following ingredients, generate 3 complete recipes. The recipes should be different from each other.
-            Format the response as a single, minified JSON array of recipe objects. Do not include any extra text, markdown, or any other characters outside of the JSON array.
-            Each recipe object must have the following fields: 'id' (a new unique UUID), 'title' (string), 'description' (string), 'ingredients' (JSON array of strings), 'tools' (JSON array of strings), 'steps' (JSON array of strings), 'imageUrls' (JSON array of strings), 'totalTimeMinutes' (integer), 'rating' (float between 0.0 and 5.0), and 'difficulty' (one of "EASY", "MEDIUM", or "HARD").
-
-            Ingredients: ${ingredients.joinToString(", ")}
-            """
-
-            val response = generativeModel.generateContent(prompt)
-            val recipes = parseGeneratedRecipes(response.text ?: "")
-            Result.success(recipes)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Result.failure(e)
-        }
-    }
-}
-
-private fun parseGeneratedRecipes(jsonString: String): List<Recipe> {
-    return try {
-        val jsonArray = JSONArray(jsonString)
-        (0 until jsonArray.length()).mapNotNull { i ->
-            val jsonObject = jsonArray.getJSONObject(i)
-            parseSingleRecipeJson(jsonObject)
-        }
-    } catch (e: Exception) {
-        e.printStackTrace()
-        emptyList()
-    }
-}
-
-private fun parseSingleRecipeJson(json: JSONObject): Recipe? = runCatching {
-    val id = json.optString("id").ifBlank { UUID.randomUUID().toString() }
-    val title = json.getString("title")
-    val description = json.getString("description")
-    val ingredients = json.getJSONArray("ingredients").toStringList()
-    val tools = json.optJSONArray("tools")?.toStringList() ?: emptyList()
-    val steps = json.getJSONArray("steps").toStringList()
-    val images = json.optJSONArray("imageUrls")?.toStringList() ?: emptyList()
-    val totalTime = json.getInt("totalTimeMinutes")
-    val rating = json.optDouble("rating", 4.0).toFloat()
-    val difficulty = Difficulty.valueOf(json.getString("difficulty").uppercase())
-
-    Recipe(
-        id = id,
-        title = title,
-        description = description,
-        ingredients = ingredients,
-        tools = tools,
-        steps = steps,
-        imageUrls = images,
-        totalTimeMinutes = totalTime,
-        rating = rating,
-        difficulty = difficulty
-    )
-}.getOrNull()
-
-private fun JSONArray.toStringList(): List<String> = buildList(length()) {
-    for (index in 0 until length()) {
-        add(getString(index))
     }
 }
