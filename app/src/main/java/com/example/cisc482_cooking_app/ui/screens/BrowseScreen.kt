@@ -139,7 +139,7 @@ private suspend fun generateRecipesFromIngredients(ingredients: List<String>): R
     return withContext(Dispatchers.IO) {
         try {
             val generativeModel = GenerativeModel(
-                modelName = "gemini-1.5-flash-latest",
+                modelName = "gemini-2.5-flash",
                 apiKey = BuildConfig.GEMINI_API_KEY
             )
             val prompt = """
